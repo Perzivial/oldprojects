@@ -26,6 +26,7 @@ public class Component extends JComponent
 	double zoomAmount = .2;
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	int translateX = 0;
+	int translateY = 0;
 	public Component() {
 		blocks.add(ground);
 		generateMountains2();
@@ -34,16 +35,20 @@ public class Component extends JComponent
 	@Override
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
-		g2.translate(translateX, 1);
+		g2.translate(translateX, translateY);
 		g2.scale(zoomAmount, zoomAmount);
 
 		for (Block block : blocks) {
 			block.draw(g2);
 		}
-		if(isKeyPressed(KeyEvent.VK_A))
-			translateX ++;
-		if(isKeyPressed(KeyEvent.VK_D))
-			translateX --;
+		if (isKeyPressed(KeyEvent.VK_A))
+			translateX++;
+		if (isKeyPressed(KeyEvent.VK_D))
+			translateX--;
+		if (isKeyPressed(KeyEvent.VK_W))
+			translateY++;
+		if (isKeyPressed(KeyEvent.VK_S))
+			translateY--;
 	}
 
 	public void generateMountains() {
@@ -69,14 +74,29 @@ public class Component extends JComponent
 
 	}
 
+	// the current code for generating
 	public void generateMountains2() {
 		int lastHeight;
 		int height = Helper.randInt(300, 305);
 		for (int i = 0; i < 5000 / 20; i++) {
 			blocks.add(new Block(i * 20, height, 20, 20, groundclr));
 			lastHeight = height;
-			height = lastHeight + Helper.randInt(-3, 3);
+			height = lastHeight + Helper.randInt(-5, 5);
 		}
+		System.out.println("Initial line");
+		ArrayList<Block> temp = new ArrayList<Block>();
+		int count = 1;
+		for (Block block : blocks) {
+			int y = block.rect.y;
+
+			while (y < 540) {
+				y += 20;
+				temp.add(new Block(block.rect.x, y, 20, 20, groundclr));
+			}
+			System.out.println("Filling in blocks. " + count + " completed");
+			count++;
+		}
+		blocks.addAll(temp);
 	}
 
 	public void smoothMountains() {

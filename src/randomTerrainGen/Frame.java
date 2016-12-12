@@ -53,7 +53,7 @@ public class Frame extends JFrame {
 		frame.setTitle("Spare Management System");
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//theComponent.addKeyListener(theComponent);
+		theComponent.addKeyListener(theComponent);
 		theComponent.addMouseListener(theComponent);
 		theComponent.addMouseMotionListener(theComponent);
 		theComponent.addMouseWheelListener(theComponent);

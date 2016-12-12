@@ -1,6 +1,8 @@
 package randomTerrainGen;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -10,17 +12,20 @@ import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import javax.swing.JComponent;
 
-public class Component extends JComponent implements MouseListener, MouseWheelListener, MouseMotionListener {
+public class Component extends JComponent
+		implements MouseListener, MouseWheelListener, MouseMotionListener, KeyListener {
 	Color groundclr = Color.green;
 	Block ground = new Block(0, 560, 5000, 20, groundclr);
 	ArrayList<Block> blocks = new ArrayList<Block>();
 	ArrayList<Shape> shapes = new ArrayList<Shape>();
 	Point mousePoint = new Point();
-	double zoomAmount = 1;
-
+	double zoomAmount = .2;
+	HashSet<Integer> keysPressed = new HashSet<Integer>();
+	int translateX = 0;
 	public Component() {
 		blocks.add(ground);
 		generateMountains2();
@@ -29,12 +34,16 @@ public class Component extends JComponent implements MouseListener, MouseWheelLi
 	@Override
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
+		g2.translate(translateX, 1);
 		g2.scale(zoomAmount, zoomAmount);
 
 		for (Block block : blocks) {
 			block.draw(g2);
 		}
-
+		if(isKeyPressed(KeyEvent.VK_A))
+			translateX ++;
+		if(isKeyPressed(KeyEvent.VK_D))
+			translateX --;
 	}
 
 	public void generateMountains() {
@@ -98,6 +107,12 @@ public class Component extends JComponent implements MouseListener, MouseWheelLi
 		return true;
 	}
 
+	public boolean isKeyPressed(int key) {
+		if (keysPressed.contains(key))
+			return true;
+		return false;
+	}
+
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
@@ -136,18 +151,35 @@ public class Component extends JComponent implements MouseListener, MouseWheelLi
 				zoomAmount += e.getPreciseWheelRotation() / 10;
 		if (zoomAmount < .2)
 			zoomAmount = .2;
-		if(zoomAmount > 1)
+		if (zoomAmount > 1)
 			zoomAmount = 1;
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		mousePoint = e.getPoint();
+
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		keysPressed.add(e.getKeyCode());
+
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		keysPressed.remove(e.getKeyCode());
+
 	}
 }

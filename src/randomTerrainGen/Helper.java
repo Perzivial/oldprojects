@@ -63,4 +63,29 @@ public class Helper {
 		}
 		return out;
 	}
+
+	public static int amountOf(String in, ArrayList<String> list) {
+		int out = 0;
+		for (String str : list) {
+			if (str.equals(in))
+				out++;
+		}
+		return out;
+	}
+
+	public static int weigh(int... list) {
+		int index = 0;
+		int value = Integer.MIN_VALUE;
+		for (int i = 0; i < list.length; i++) {
+			int current = list[i];
+			if (current > value) {
+				value = current;
+				index = i;
+			}
+
+		}
+		System.out.println(index);
+		return index;
+	}
+
 }

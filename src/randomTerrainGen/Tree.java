@@ -6,7 +6,7 @@ import java.awt.Graphics;
 public class Tree {
 	int x;
 	int y;
-
+	int health = 1000;
 	public Tree(int posx, int posy) {
 		x = posx;
 		y = posy;

@@ -22,8 +22,8 @@ public class Component extends JComponent
 	Color barrierclr = Color.gray;
 	Block ground = new Block(0, 560, 5000, 20, barrierclr);
 		
-	Block barrier1 = new Block(0, 0, 10, 600, barrierclr);
-	Block barrier2 = new Block(4990, 0, 10, 600, barrierclr);
+	Block barrier1 = new Block(0, 0, 10, 560, barrierclr);
+	Block barrier2 = new Block(4990, 0, 10, 560, barrierclr);
 	ArrayList<Block> blocks = new ArrayList<Block>();
 	ArrayList<Shape> shapes = new ArrayList<Shape>();
 	Point mousePoint = new Point();
@@ -34,6 +34,8 @@ public class Component extends JComponent
 	Human hmn = new Human();
 	
 	ArrayList<Tree> trees = new ArrayList<Tree>();
+	ArrayList<Berry> berries = new ArrayList<Berry>();
+	ArrayList<House> houses = new ArrayList<House>();
 	public Component() {
 		hmn.setComp(this);
 
@@ -53,11 +55,24 @@ public class Component extends JComponent
 			block.draw(g2);
 		}
 
-		hmn.draw(g2);
+		
 		
 		for(Tree tree: trees){
 			tree.draw(g2);
 		}
+		
+		for(House house: houses){
+			house.draw(g2);
+		}
+		
+		hmn.draw(g2);
+		
+		for(Berry berry: berries){
+			berry.draw(g2);
+		}
+		
+		
+		
 		controlStuff();
 	}
 	public void controlStuff(){
@@ -127,9 +142,13 @@ public class Component extends JComponent
 			}
 			System.out.println("Filling in blocks. " + count + " completed");
 			count++;
-			//one in every 10 blocks should have a tree
-			if(Helper.randInt(0, 10) == 3)
+			//one in every 10 blocks should have a tree, or a berry bush
+			if(Helper.randInt(0, 5) == 3){
+				if(Helper.randInt(0, 1) == 1)
 				trees.add(new Tree(block.rect.x + 5, block.rect.y));
+				else
+					berries.add(new Berry(block.rect.x + 5, block.rect.y));
+			}
 			
 		}
 		blocks.addAll(temp);

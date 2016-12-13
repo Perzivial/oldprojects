@@ -19,7 +19,11 @@ import javax.swing.JComponent;
 public class Component extends JComponent
 		implements MouseListener, MouseWheelListener, MouseMotionListener, KeyListener {
 	Color groundclr = Color.green;
-	Block ground = new Block(0, 560, 5000, 20, groundclr);
+	Color barrierclr = Color.gray;
+	Block ground = new Block(0, 560, 5000, 20, barrierclr);
+		
+	Block barrier1 = new Block(0, 0, 10, 600, barrierclr);
+	Block barrier2 = new Block(4990, 0, 10, 600, barrierclr);
 	ArrayList<Block> blocks = new ArrayList<Block>();
 	ArrayList<Shape> shapes = new ArrayList<Shape>();
 	Point mousePoint = new Point();
@@ -27,28 +31,49 @@ public class Component extends JComponent
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	int translateX = 0;
 	int translateY = 0;
+	Human hmn = new Human();
+
 	public Component() {
-		blocks.add(ground);
+		hmn.setComp(this);
+
 		generateMountains2();
+		blocks.add(ground);
+		blocks.add(barrier1);
+		blocks.add(barrier2);
 	}
 
 	@Override
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
-		g2.translate(translateX, translateY);
-		g2.scale(zoomAmount, zoomAmount);
 
+		g2.scale(zoomAmount, zoomAmount);
+		g2.translate(translateX, translateY);
 		for (Block block : blocks) {
 			block.draw(g2);
 		}
-		if (isKeyPressed(KeyEvent.VK_A))
-			translateX++;
-		if (isKeyPressed(KeyEvent.VK_D))
-			translateX--;
-		if (isKeyPressed(KeyEvent.VK_W))
-			translateY++;
-		if (isKeyPressed(KeyEvent.VK_S))
-			translateY--;
+
+		hmn.draw(g2);
+		// hmn.groundPhysics(blocks);
+
+		if (isKeyPressed(KeyEvent.VK_SHIFT)) {
+			if (isKeyPressed(KeyEvent.VK_A))
+				translateX += 5;
+			if (isKeyPressed(KeyEvent.VK_D))
+				translateX -= 5;
+			if (isKeyPressed(KeyEvent.VK_W))
+				translateY += 5;
+			if (isKeyPressed(KeyEvent.VK_S))
+				translateY -= 5;
+		} else {
+			if (isKeyPressed(KeyEvent.VK_A))
+				translateX++;
+			if (isKeyPressed(KeyEvent.VK_D))
+				translateX--;
+			if (isKeyPressed(KeyEvent.VK_W))
+				translateY++;
+			if (isKeyPressed(KeyEvent.VK_S))
+				translateY--;
+		}
 	}
 
 	public void generateMountains() {
@@ -82,6 +107,7 @@ public class Component extends JComponent
 			blocks.add(new Block(i * 20, height, 20, 20, groundclr));
 			lastHeight = height;
 			height = lastHeight + Helper.randInt(-5, 5);
+
 		}
 		System.out.println("Initial line");
 		ArrayList<Block> temp = new ArrayList<Block>();
@@ -165,14 +191,11 @@ public class Component extends JComponent
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-
-		if (zoomAmount > .23000 || e.getWheelRotation() > 0)
-			if (zoomAmount < 1.100)
-				zoomAmount += e.getPreciseWheelRotation() / 10;
-		if (zoomAmount < .2)
-			zoomAmount = .2;
-		if (zoomAmount > 1)
-			zoomAmount = 1;
+		/*
+		 * if (zoomAmount > .23000 || e.getWheelRotation() > 0) if (zoomAmount <
+		 * 1.100) zoomAmount += e.getPreciseWheelRotation() / 10; if (zoomAmount
+		 * < .2) zoomAmount = .2; if (zoomAmount > 1) zoomAmount = 1;
+		 */
 	}
 
 	@Override
@@ -194,12 +217,18 @@ public class Component extends JComponent
 	@Override
 	public void keyPressed(KeyEvent e) {
 		keysPressed.add(e.getKeyCode());
-
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_EQUALS:
+			zoomAmount += .2;
+			break;
+		case KeyEvent.VK_MINUS:
+			zoomAmount -= .2;
+			break;
+		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
 		keysPressed.remove(e.getKeyCode());
-
 	}
 }

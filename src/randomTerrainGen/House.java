@@ -17,7 +17,7 @@ public class House {
 		g.fillRect(x,y -20, 20, 20);
 		g.setColor(Color.red);
 		Polygon poly = new Polygon();
-		poly.addPoint(x, -20);
+		poly.addPoint(x, y-20);
 		poly.addPoint(x+10, y-30);
 		poly.addPoint(x+20, y-20);
 		g.fillPolygon(poly);

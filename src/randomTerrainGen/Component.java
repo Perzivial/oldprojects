@@ -18,10 +18,13 @@ import javax.swing.JComponent;
 
 public class Component extends JComponent
 		implements MouseListener, MouseWheelListener, MouseMotionListener, KeyListener {
+
+	boolean speedUp = false;
+
 	Color groundclr = Color.green;
 	Color barrierclr = Color.gray;
 	Block ground = new Block(0, 560, 5000, 20, barrierclr);
-		
+
 	Block barrier1 = new Block(0, 0, 10, 560, barrierclr);
 	Block barrier2 = new Block(4990, 0, 10, 560, barrierclr);
 	ArrayList<Block> blocks = new ArrayList<Block>();
@@ -32,12 +35,23 @@ public class Component extends JComponent
 	int translateX = 0;
 	int translateY = 0;
 	Human hmn = new Human();
-	
+
 	ArrayList<Tree> trees = new ArrayList<Tree>();
 	ArrayList<Berry> berries = new ArrayList<Berry>();
 	ArrayList<House> houses = new ArrayList<House>();
+	ArrayList<Human> humans = new ArrayList<Human>();
+
+	ArrayList<Human> toAdd = new ArrayList<Human>();
+
 	public Component() {
 		hmn.setComp(this);
+
+		Human hmn2 = new Human();
+		hmn2.x = hmn.x + Helper.randInt(-100, 100);
+		hmn.sex = true;
+		hmn2.sex = false;
+		humans.add(hmn);
+		humans.add(hmn2);
 
 		generateMountains2();
 		blocks.add(ground);
@@ -48,34 +62,34 @@ public class Component extends JComponent
 	@Override
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
-
+		toAdd.clear();
 		g2.scale(zoomAmount, zoomAmount);
 		g2.translate(translateX, translateY);
 		for (Block block : blocks) {
 			block.draw(g2);
 		}
 
-		
-		
-		for(Tree tree: trees){
+		for (Tree tree : trees) {
 			tree.draw(g2);
 		}
-		
-		for(House house: houses){
+
+		for (House house : houses) {
 			house.draw(g2);
 		}
-		
-		hmn.draw(g2);
-		
-		for(Berry berry: berries){
+
+		for (Human human : humans) {
+			human.draw(g2);
+		}
+
+		for (Berry berry : berries) {
 			berry.draw(g2);
 		}
-		
-		
-		
+
+		humans.addAll(toAdd);
 		controlStuff();
 	}
-	public void controlStuff(){
+
+	public void controlStuff() {
 
 		if (isKeyPressed(KeyEvent.VK_SHIFT)) {
 			if (isKeyPressed(KeyEvent.VK_A))
@@ -97,6 +111,7 @@ public class Component extends JComponent
 				translateY--;
 		}
 	}
+
 	public void generateMountains() {
 		for (int i = 0; i < 3000; i++) {
 			Block blocktemp = new Block(Helper.randInt(0, 240) * 20, 0, 20, 20, groundclr);
@@ -138,18 +153,18 @@ public class Component extends JComponent
 
 			while (y < 540) {
 				y += 20;
-				temp.add(new Block(block.rect.x, y, 20, 20, groundclr));
+				// temp.add(new Block(block.rect.x, y, 20, 20, groundclr));
 			}
 			System.out.println("Filling in blocks. " + count + " completed");
 			count++;
-			//one in every 10 blocks should have a tree, or a berry bush
-			if(Helper.randInt(0, 5) == 3){
-				if(Helper.randInt(0, 1) == 1)
-				trees.add(new Tree(block.rect.x + 5, block.rect.y));
+			// one in every 10 blocks should have a tree, or a berry bush
+			if (Helper.randInt(0, 2) == 1) {
+				if (Helper.randInt(0, 1) == 1)
+					trees.add(new Tree(block.rect.x + 5, block.rect.y));
 				else
 					berries.add(new Berry(block.rect.x + 5, block.rect.y));
 			}
-			
+
 		}
 		blocks.addAll(temp);
 	}
@@ -253,11 +268,13 @@ public class Component extends JComponent
 		case KeyEvent.VK_MINUS:
 			zoomAmount -= .2;
 			break;
+
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
 		keysPressed.remove(e.getKeyCode());
+
 	}
 }

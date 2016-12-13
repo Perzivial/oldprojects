@@ -15,7 +15,7 @@ public class Human {
 	int multiplyWeight = 0;
 	String genome = "";
 	// movement stuff
-	double x = Helper.randInt(10, 4990);
+	double x = Helper.randInt(500, 4500);
 	double y = 20;
 	double velX = 0;
 	double velY = 0;
@@ -27,6 +27,11 @@ public class Human {
 	Berry nearestBerry = null;
 	ArrayList<String> inventory = new ArrayList<String>();
 	boolean isDead = false;
+	boolean sex;
+	int screamCounter = 0;
+	Human mate = null;
+	House myHouse = null;
+	int age = 0;
 
 	public Human(int eat, int tree, int build, int steal) {
 		eatWeight = eat;
@@ -42,6 +47,13 @@ public class Human {
 	public Human() {
 		generateGenome();
 		createStatsFromGenome();
+		// sex = Helper.randInt(0, 1) == 0;
+	}
+
+	public Human(String gene1, String gene2) {
+		generateGenome(gene1, gene2);
+		createStatsFromGenome();
+		// sex = Helper.randInt(0, 1) == 0;
 	}
 
 	public void draw(Graphics g) {
@@ -54,6 +66,8 @@ public class Human {
 		g.drawLine((int) x, (int) y, (int) x, (int) y - 10);
 		g.fillRect((int) x - 2, (int) y - 12, 4, 4);
 
+		if (screamCounter > -1)
+			screamCounter--;
 	}
 
 	public void move() {
@@ -65,8 +79,12 @@ public class Human {
 		updateRelations();
 
 		hunger();
-
-		chooseAction();
+		if (mate == null)
+			chooseAction();
+		else {
+			goToMatesHouse();
+		}
+		age++;
 	}
 
 	public void die() {
@@ -91,7 +109,11 @@ public class Human {
 	public void walkRight() {
 
 		Rectangle rect = new Rectangle((int) x + 2, (int) y - 4, 2, 4);
-		velX = .3;
+
+		if (sex == true)
+			velX = .3;
+		else
+			velX = .5;
 		for (Block block : comp.blocks) {
 			if (rect.intersects(block.rect))
 				jump();
@@ -102,7 +124,10 @@ public class Human {
 
 	public void walkLeft() {
 		Rectangle rect = new Rectangle((int) x - 2, (int) y - 4, 2, 4);
-		velX = -.3;
+		if (sex == true)
+			velX = -.3;
+		else
+			velX = -.5;
 		for (Block block : comp.blocks) {
 			if (rect.intersects(block.rect))
 				jump();
@@ -125,16 +150,16 @@ public class Human {
 		eatNum = 5 - Helper.amountOf("berry", inventory);
 		treeNum = 5 - Helper.amountOf("log", inventory);
 		buildNum = Helper.amountOf("log", inventory);
+		multiplyNum = amountOfMatesInArea();
 		eatNum *= eatWeight;
 		treeNum *= treeWeight;
 		buildNum = buildWeight;
 		multiplyNum *= multiplyWeight;
-		if(hasHouse())
+		if (hasHouse())
 			buildNum = Integer.MIN_VALUE;
-		System.out.println("eatnum " + eatNum);
-		System.out.println("treenum " + treeNum);
-		System.out.println("buildnum " + buildNum);
-		System.out.println("multiplynum " + multiplyNum);
+		else
+			multiplyNum = Integer.MIN_VALUE;
+
 		switch (Helper.weigh(eatNum, treeNum, buildNum, multiplyNum) + 1) {
 		case 1:
 			goToNearestBerry();
@@ -146,9 +171,23 @@ public class Human {
 			buildHouse();
 			break;
 		case 4:
-			// multiplying
+			scream();
 			break;
 		}
+	}
+
+	public void scream() {
+		screamCounter = 60;
+	
+	}
+
+	public int amountOfMatesInArea() {
+		int count = 0;
+		for (Human human : comp.humans) {
+			if (human.sex == !sex && human.age > 2000)
+				count++;
+		}
+		return count;
 	}
 
 	public void eat() {
@@ -167,7 +206,7 @@ public class Human {
 		}
 
 	}
-	
+
 	public void goToNearestTree() {
 		if (nearestTree != null) {
 			if (nearestTree.x < x - 5)
@@ -223,20 +262,50 @@ public class Human {
 	}
 
 	public void buildHouse() {
-		comp.houses.add(new House(genome, (int) x, (int) y));
+		House newHouse = new House(genome, (int) x, (int) y);
+		myHouse = newHouse;
+		comp.houses.add(newHouse);
 		for (int i = 0; i < 3; i++) {
 			inventory.remove("log");
 		}
 	}
 
-	public boolean hasHouse(){
-		for(House house: comp.houses){
-			if(house.creatorGenome == genome)
+	public boolean hasHouse() {
+		for (House house : comp.houses) {
+			if (house.creatorGenome == genome)
 				return true;
 		}
 		return false;
 	}
-	
+
+	public void goToMatesHouse() {
+			System.out.println("meep");
+		if(x > mate.x + 2)
+			walkLeft();
+		else if(x < mate.x - 2)
+			walkRight();
+		
+		if (Math.abs(x - mate.x) < 5) {
+			multiply();
+			inventory.remove("berry");
+			inventory.remove("berry");
+			inventory.remove("berry");
+		}
+
+	}
+
+	public void multiply() {
+		if (sex == true) {
+			Human child = new Human(genome, mate.genome);
+
+			child.x = x;
+			child.y = y - 10;
+			comp.toAdd.add(child);
+			
+		}
+		mate = null;
+	}
+
 	public void updateRelations() {
 		updateTimer--;
 		if (updateTimer <= 0) {
@@ -245,6 +314,21 @@ public class Human {
 			findNearestBerry();
 
 			updateTimer = 20;
+		}
+		if (screamCounter > 0) {
+
+			for (Human human : comp.humans) {
+				if (human.sex = !sex && human != this) {
+					if (human.screamCounter > 0) {
+						if (mate == null)
+							mate = human;
+						else {
+							if (Math.abs(human.x - x) < Math.abs(mate.x - x))
+								mate = human;
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -300,10 +384,23 @@ public class Human {
 	}
 
 	public void generateGenome() {
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 50; i++) {
 			genome += (char) Helper.randInt(33, 126);
 		}
 		System.out.println("The genome is " + genome);
+	}
+
+	public void generateGenome(String gene1, String gene2) {
+		int splitPoint = Helper.randInt(0, gene1.length());
+		String out = gene1.substring(0, splitPoint) + gene2.substring(splitPoint, gene2.length());
+		char[] temp = out.toCharArray();
+		int num = Helper.randInt(0, temp.length);
+		temp[num] = (char) Helper.randInt(33, 126);
+		genome = "";
+		for (char current : temp) {
+			genome += current;
+		}
+
 	}
 
 	public static Component getComp() {

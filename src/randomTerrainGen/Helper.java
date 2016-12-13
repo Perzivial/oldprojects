@@ -84,7 +84,6 @@ public class Helper {
 			}
 
 		}
-		System.out.println(index);
 		return index;
 	}
 

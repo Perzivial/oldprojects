@@ -15,7 +15,7 @@ public class Human {
 	int multiplyWeight = 0;
 	String genome = "";
 	// movement stuff
-	double x = Helper.randInt(500, 4500);
+	double x = Helper.randInt(-9000, 19000);
 	double y = 20;
 	double velX = 0;
 	double velY = 0;
@@ -68,6 +68,7 @@ public class Human {
 
 		if (screamCounter > -1)
 			screamCounter--;
+		
 	}
 
 	public void move() {
@@ -148,7 +149,7 @@ public class Human {
 		int buildNum = 0;
 		int multiplyNum = 0;
 		eatNum = 5 - Helper.amountOf("berry", inventory);
-		treeNum = 5 - Helper.amountOf("log", inventory);
+		treeNum = 2 - Helper.amountOf("log", inventory);
 		buildNum = Helper.amountOf("log", inventory);
 		multiplyNum = amountOfMatesInArea();
 		eatNum *= eatWeight;
@@ -178,7 +179,7 @@ public class Human {
 
 	public void scream() {
 		screamCounter = 60;
-	
+
 	}
 
 	public int amountOfMatesInArea() {
@@ -262,11 +263,37 @@ public class Human {
 	}
 
 	public void buildHouse() {
-		House newHouse = new House(genome, (int) x, (int) y);
-		myHouse = newHouse;
-		comp.houses.add(newHouse);
-		for (int i = 0; i < 3; i++) {
-			inventory.remove("log");
+		House closeHouse = null;
+		boolean shouldBuild = false;
+		if (comp.houses.size() == 0)
+			shouldBuild = true;
+		else {
+			for (House house : comp.houses) {
+				if (isSimilar(house.creatorGenome)) {
+					closeHouse = house;
+					break;
+				}
+			}
+		if(closeHouse != null){
+		if (Math.abs(closeHouse.x - x) < 50)
+			shouldBuild = true;
+		else {
+			if (closeHouse.x < x)
+				walkLeft();
+			else
+				walkRight();
+		}
+		}else{
+			shouldBuild = true;
+		}
+		}
+		if (shouldBuild) {
+			House newHouse = new House(genome, (int) x, (int) y);
+			myHouse = newHouse;
+			comp.houses.add(newHouse);
+			for (int i = 0; i < 3; i++) {
+				inventory.remove("log");
+			}
 		}
 	}
 
@@ -279,12 +306,11 @@ public class Human {
 	}
 
 	public void goToMatesHouse() {
-			System.out.println("meep");
-		if(x > mate.x + 2)
+		if (x > mate.x + 2)
 			walkLeft();
-		else if(x < mate.x - 2)
+		else if (x < mate.x - 2)
 			walkRight();
-		
+
 		if (Math.abs(x - mate.x) < 5) {
 			multiply();
 			inventory.remove("berry");
@@ -301,7 +327,7 @@ public class Human {
 			child.x = x;
 			child.y = y - 10;
 			comp.toAdd.add(child);
-			
+
 		}
 		mate = null;
 	}
@@ -409,5 +435,16 @@ public class Human {
 
 	public static void setComp(Component comp) {
 		Human.comp = comp;
+	}
+
+	public boolean isSimilar(String gene2) {
+		int count = 0;
+		for (int i = 0; i < genome.length(); i++) {
+			if (genome.charAt(i) == gene2.charAt(i))
+				count++;
+		}
+		if (count > 10)
+			return true;
+		return false;
 	}
 }

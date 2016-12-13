@@ -23,10 +23,9 @@ public class Component extends JComponent
 
 	Color groundclr = Color.green;
 	Color barrierclr = Color.gray;
-	Block ground = new Block(0, 560, 5000, 20, barrierclr);
-
-	Block barrier1 = new Block(0, 0, 10, 560, barrierclr);
-	Block barrier2 = new Block(4990, 0, 10, 560, barrierclr);
+	// Block ground = new Block(0, 560, 5000, 20, barrierclr);
+	// Block barrier1 = new Block(0, 0, 10, 560, barrierclr);
+	// Block barrier2 = new Block(4990, 0, 10, 560, barrierclr);
 	ArrayList<Block> blocks = new ArrayList<Block>();
 	ArrayList<Shape> shapes = new ArrayList<Shape>();
 	Point mousePoint = new Point();
@@ -42,21 +41,26 @@ public class Component extends JComponent
 	ArrayList<Human> humans = new ArrayList<Human>();
 
 	ArrayList<Human> toAdd = new ArrayList<Human>();
+	int tick = 120;
 
 	public Component() {
-		hmn.setComp(this);
 
+		hmn.setComp(this);
 		Human hmn2 = new Human();
-		hmn2.x = hmn.x + Helper.randInt(-100, 100);
+		hmn2.x = hmn.x + Helper.randInt(-9000, 19000);
 		hmn.sex = true;
 		hmn2.sex = false;
 		humans.add(hmn);
 		humans.add(hmn2);
 
+		for (int i = 0; i < 100; i++) {
+			humans.add(new Human());
+		}
+
 		generateMountains2();
-		blocks.add(ground);
-		blocks.add(barrier1);
-		blocks.add(barrier2);
+		// blocks.add(ground);
+		// blocks.add(barrier1);
+		// blocks.add(barrier2);
 	}
 
 	@Override
@@ -87,6 +91,28 @@ public class Component extends JComponent
 
 		humans.addAll(toAdd);
 		controlStuff();
+		tick--;
+		if (tick <= 0) {
+			onTick();
+			tick = 120;
+		}
+	}
+
+	public void onTick() {
+
+	}
+
+	public void continueToPlaceFlora() {
+		for (Block block : blocks) {
+			// one in every 10 blocks should have a tree, or a berry bush
+			if (Helper.randInt(0, 100) == 1) {
+				if (Helper.randInt(0, 1) == 1)
+					trees.add(new Tree(block.rect.x + 5, block.rect.y));
+				else
+					berries.add(new Berry(block.rect.x + 5, block.rect.y));
+			}
+
+		}
 	}
 
 	public void controlStuff() {
@@ -139,8 +165,8 @@ public class Component extends JComponent
 	public void generateMountains2() {
 		int lastHeight;
 		int height = Helper.randInt(300, 305);
-		for (int i = 0; i < 5000 / 20; i++) {
-			blocks.add(new Block(i * 20, height, 20, 20, groundclr));
+		for (int i = 0; i < 20000 / 20; i++) {
+			blocks.add(new Block((i * 20) - 10000, height, 20, 20, groundclr));
 			lastHeight = height;
 			height = lastHeight + Helper.randInt(-5, 5);
 
@@ -264,9 +290,11 @@ public class Component extends JComponent
 		switch (e.getKeyCode()) {
 		case KeyEvent.VK_EQUALS:
 			zoomAmount += .2;
+
 			break;
 		case KeyEvent.VK_MINUS:
 			zoomAmount -= .2;
+
 			break;
 
 		}

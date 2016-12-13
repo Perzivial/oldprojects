@@ -52,7 +52,6 @@ public class Human {
 		y += velY;
 		gravity();
 		groundPhysics();
-		walkLeft();
 	}
 
 	public void gravity() {

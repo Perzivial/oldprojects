@@ -32,7 +32,8 @@ public class Component extends JComponent
 	int translateX = 0;
 	int translateY = 0;
 	Human hmn = new Human();
-
+	
+	ArrayList<Tree> trees = new ArrayList<Tree>();
 	public Component() {
 		hmn.setComp(this);
 
@@ -53,7 +54,13 @@ public class Component extends JComponent
 		}
 
 		hmn.draw(g2);
-		// hmn.groundPhysics(blocks);
+		
+		for(Tree tree: trees){
+			tree.draw(g2);
+		}
+		controlStuff();
+	}
+	public void controlStuff(){
 
 		if (isKeyPressed(KeyEvent.VK_SHIFT)) {
 			if (isKeyPressed(KeyEvent.VK_A))
@@ -75,7 +82,6 @@ public class Component extends JComponent
 				translateY--;
 		}
 	}
-
 	public void generateMountains() {
 		for (int i = 0; i < 3000; i++) {
 			Block blocktemp = new Block(Helper.randInt(0, 240) * 20, 0, 20, 20, groundclr);
@@ -121,6 +127,10 @@ public class Component extends JComponent
 			}
 			System.out.println("Filling in blocks. " + count + " completed");
 			count++;
+			//one in every 10 blocks should have a tree
+			if(Helper.randInt(0, 10) == 3)
+				trees.add(new Tree(block.rect.x + 5, block.rect.y));
+			
 		}
 		blocks.addAll(temp);
 	}

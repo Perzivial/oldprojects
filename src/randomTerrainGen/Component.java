@@ -45,6 +45,7 @@ public class Component extends JComponent
 	int tick = 1000;
 	int time = 30;
 	Rectangle screenRect = new Rectangle(0, 0, 1000, 600);
+	boolean shouldDraw = true;
 
 	public Component() {
 
@@ -75,25 +76,26 @@ public class Component extends JComponent
 		g.fillRect(0, 0, 1000, 600);
 		g2.scale(zoomAmount, zoomAmount);
 		g2.translate(translateX, translateY);
+		if (shouldDraw) {
+			for (House house : houses) {
+				house.draw(g2);
+			}
 
-		for (House house : houses) {
-			house.draw(g2);
+			for (Block block : blocks) {
+				block.draw(g2);
+			}
+
+			for (Tree tree : trees) {
+				tree.draw(g2);
+			}
 		}
-
-		for (Block block : blocks) {
-			block.draw(g2);
-		}
-
-		for (Tree tree : trees) {
-			tree.draw(g2);
-		}
-
 		for (Human human : humans) {
-			human.draw(g2);
+			human.draw(g2, shouldDraw);
 		}
-
-		for (Berry berry : berries) {
-			berry.draw(g2);
+		if (shouldDraw) {
+			for (Berry berry : berries) {
+				berry.draw(g2);
+			}
 		}
 		villageDetector();
 		humans.addAll(toAdd);
@@ -215,7 +217,7 @@ public class Component extends JComponent
 			if (village.size() > 2) {
 
 				for (House house3 : village) {
-					
+
 					if (house3.clr == Color.white) {
 						house3.clr = clr;
 						for (Human human : humans) {
@@ -365,6 +367,9 @@ public class Component extends JComponent
 			break;
 		case KeyEvent.VK_Q:
 			analyse();
+			break;
+		case KeyEvent.VK_SPACE:
+			shouldDraw = !shouldDraw;
 			break;
 		}
 	}

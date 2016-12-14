@@ -73,10 +73,10 @@ public class Frame extends JFrame{
 		timer = new Timer(ONE_SECOND / 300, new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
-				
+				long before = System.nanoTime();
 				theComponent.repaint();
-
-
+				long after = System.nanoTime();
+				System.out.println((((after - before))/1000)*60);
 			}
 		});
 	}

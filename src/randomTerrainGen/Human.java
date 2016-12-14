@@ -34,7 +34,7 @@ public class Human {
 	House myHouse = null;
 	int age = 0;
 	boolean shouldDraw = true;
-	
+
 	public Human(int eat, int tree, int build, int steal) {
 		eatWeight = eat;
 		treeWeight = tree;
@@ -58,16 +58,19 @@ public class Human {
 		// sex = Helper.randInt(0, 1) == 0;
 	}
 
-	public void draw(Graphics g) {
+	public void draw(Graphics g, boolean shouldShow) {
 		shouldDraw = true;
+
 		if (!isDead) {
 			move();
 			g.setColor(clr);
 		} else
 			g.setColor(clr.darker());
-		if (shouldDraw) {
-			g.drawLine((int) x, (int) y, (int) x, (int) y - 10);
-			g.fillRect((int) x - 2, (int) y - 12, 4, 4);
+		if (shouldShow) {
+			if (shouldDraw) {
+				g.drawLine((int) x, (int) y, (int) x, (int) y - 10);
+				g.fillRect((int) x - 2, (int) y - 12, 4, 4);
+			}
 		}
 		if (screamCounter > -1)
 			screamCounter--;

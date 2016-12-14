@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
@@ -41,7 +42,9 @@ public class Component extends JComponent
 	ArrayList<Human> humans = new ArrayList<Human>();
 
 	ArrayList<Human> toAdd = new ArrayList<Human>();
-	int tick = 120;
+	int tick = 1000;
+	int time = 30;
+	Rectangle screenRect = new Rectangle(0, 0, 1000, 600);
 
 	public Component() {
 
@@ -66,19 +69,23 @@ public class Component extends JComponent
 	@Override
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
+		AffineTransform old = g2.getTransform();
 		toAdd.clear();
+		g.setColor(getSkyColor());
+		g.fillRect(0, 0, 1000, 600);
 		g2.scale(zoomAmount, zoomAmount);
 		g2.translate(translateX, translateY);
+
+		for (House house : houses) {
+			house.draw(g2);
+		}
+
 		for (Block block : blocks) {
 			block.draw(g2);
 		}
 
 		for (Tree tree : trees) {
 			tree.draw(g2);
-		}
-
-		for (House house : houses) {
-			house.draw(g2);
 		}
 
 		for (Human human : humans) {
@@ -88,7 +95,7 @@ public class Component extends JComponent
 		for (Berry berry : berries) {
 			berry.draw(g2);
 		}
-
+		villageDetector();
 		humans.addAll(toAdd);
 		controlStuff();
 		tick--;
@@ -96,20 +103,52 @@ public class Component extends JComponent
 			onTick();
 			tick = 120;
 		}
+
+		g2.setTransform(old);
+
+	}
+
+	public void analyse() {
+		int countInHouse = 0;
+		for (Human human : humans) {
+			if (human.shouldDraw == false)
+				countInHouse++;
+		}
+		System.out.println("----------");
+		System.out.println("There are a total of " + humans.size() + " humans");
+		System.out.println("A total of " + countInHouse + " humans are in their houses");
+
+	}
+
+	public Color getSkyColor() {
+		if (time < 50 || time > 150)
+			return new Color(0, 0, 40);
+		else
+			return new Color(0, 0, 90);
 	}
 
 	public void onTick() {
+		continueToPlaceFlora();
+		dayCycle();
+	}
 
+	public void dayCycle() {
+		time++;
+		if (time > 200)
+			time = 0;
 	}
 
 	public void continueToPlaceFlora() {
 		for (Block block : blocks) {
 			// one in every 10 blocks should have a tree, or a berry bush
 			if (Helper.randInt(0, 100) == 1) {
-				if (Helper.randInt(0, 1) == 1)
-					trees.add(new Tree(block.rect.x + 5, block.rect.y));
-				else
-					berries.add(new Berry(block.rect.x + 5, block.rect.y));
+				if (Helper.randInt(0, 1) == 1) {
+					if (trees.size() < 250)
+						trees.add(new Tree(block.rect.x + 5, block.rect.y));
+				} else {
+					if (berries.size() < 250)
+						berries.add(new Berry(block.rect.x + 5, block.rect.y));
+				}
 			}
 
 		}
@@ -159,6 +198,34 @@ public class Component extends JComponent
 			System.out.println("Added " + i + " blocks");
 		}
 
+	}
+
+	public void villageDetector() {
+		Color clr = Helper.randomrainbowcolor(.9f);
+		for (House house : houses) {
+			ArrayList<House> village = new ArrayList<House>();
+			village.add(house);
+			for (House house2 : houses) {
+				if (house != house2)
+					if (Math.abs(house.x - house2.x) < 100) {
+						village.add(house2);
+
+					}
+			}
+			if (village.size() > 2) {
+
+				for (House house3 : village) {
+					
+					if (house3.clr == Color.white) {
+						house3.clr = clr;
+						for (Human human : humans) {
+							if (house3.creatorGenome.equals(human.genome))
+								human.clr = clr;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// the current code for generating
@@ -296,7 +363,9 @@ public class Component extends JComponent
 			zoomAmount -= .2;
 
 			break;
-
+		case KeyEvent.VK_Q:
+			analyse();
+			break;
 		}
 	}
 

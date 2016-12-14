@@ -52,8 +52,8 @@ public class Frame extends JFrame{
 		frame.add(theComponent);
 		frame.setSize(1000, 600);
 		frame.setLocationRelativeTo(null);
-		frame.setTitle("Spare Management System");
-		frame.setResizable(false);
+		frame.setTitle("Simulation");
+		frame.setResizable(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		theComponent.addKeyListener(theComponent);
 		theComponent.addMouseListener(theComponent);
@@ -82,7 +82,7 @@ public class Frame extends JFrame{
 	}
 
 	public static void main(String[] args) throws Exception {
-		new Frame("Spare Management System");
+		new Frame("Simulation");
 		timer.start();
 
 	}

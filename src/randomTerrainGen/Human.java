@@ -14,6 +14,7 @@ public class Human {
 	int buildWeight = 0;
 	int multiplyWeight = 0;
 	String genome = "";
+	Color clr = Color.yellow;
 	// movement stuff
 	double x = Helper.randInt(-9000, 19000);
 	double y = 20;
@@ -32,7 +33,8 @@ public class Human {
 	Human mate = null;
 	House myHouse = null;
 	int age = 0;
-
+	boolean shouldDraw = true;
+	
 	public Human(int eat, int tree, int build, int steal) {
 		eatWeight = eat;
 		treeWeight = tree;
@@ -57,18 +59,19 @@ public class Human {
 	}
 
 	public void draw(Graphics g) {
+		shouldDraw = true;
 		if (!isDead) {
 			move();
-			g.setColor(Color.yellow);
+			g.setColor(clr);
 		} else
-			g.setColor(Color.yellow.darker());
-
-		g.drawLine((int) x, (int) y, (int) x, (int) y - 10);
-		g.fillRect((int) x - 2, (int) y - 12, 4, 4);
-
+			g.setColor(clr.darker());
+		if (shouldDraw) {
+			g.drawLine((int) x, (int) y, (int) x, (int) y - 10);
+			g.fillRect((int) x - 2, (int) y - 12, 4, 4);
+		}
 		if (screamCounter > -1)
 			screamCounter--;
-		
+
 	}
 
 	public void move() {
@@ -80,10 +83,11 @@ public class Human {
 		updateRelations();
 
 		hunger();
+
 		if (mate == null)
 			chooseAction();
 		else {
-			goToMatesHouse();
+			goToMate();
 		}
 		age++;
 	}
@@ -139,7 +143,7 @@ public class Human {
 
 	public void jump() {
 		if (isGrounded()) {
-			velY = -1;
+			velY = -1.2;
 		}
 	}
 
@@ -152,16 +156,28 @@ public class Human {
 		treeNum = 2 - Helper.amountOf("log", inventory);
 		buildNum = Helper.amountOf("log", inventory);
 		multiplyNum = amountOfMatesInArea();
+
+		if (nearestTree != null && nearestBerry != null) {
+			if (Math.abs(nearestTree.x - x) > 200)
+				treeNum -= 1;
+			if (Math.abs(nearestBerry.x - x) > 200)
+				eatNum -= 4;
+		}
+		if (myHouse != null && Math.abs(myHouse.x - x) > 300) {
+			eatNum -= 3;
+			treeNum -= 1;
+		}
 		eatNum *= eatWeight;
 		treeNum *= treeWeight;
-		buildNum = buildWeight;
+		buildNum *= buildWeight;
 		multiplyNum *= multiplyWeight;
-		if (hasHouse())
-			buildNum = Integer.MIN_VALUE;
-		else
+
+		if (!hasHouse())
 			multiplyNum = Integer.MIN_VALUE;
 
-		switch (Helper.weigh(eatNum, treeNum, buildNum, multiplyNum) + 1) {
+		int homeNum = (comp.getSkyColor().getBlue() < 60 && hasHouse()) ? 15 : Integer.MIN_VALUE;
+
+		switch (Helper.weigh(eatNum, treeNum, buildNum, multiplyNum, homeNum) + 1) {
 		case 1:
 			goToNearestBerry();
 			break;
@@ -173,6 +189,9 @@ public class Human {
 			break;
 		case 4:
 			scream();
+			break;
+		case 5:
+			runHome();
 			break;
 		}
 	}
@@ -200,10 +219,18 @@ public class Human {
 	public void findNearestTree() {
 
 		for (Tree tree : comp.trees) {
-			if (nearestTree == null)
-				nearestTree = tree;
-			else if (Math.abs(tree.x - x) < Math.abs(nearestTree.x - x))
-				nearestTree = tree;
+			if (myHouse != null) {
+				if (nearestTree == null && Math.abs(tree.x - myHouse.x) < 300 && Math.abs(tree.x - x) < 200)
+					nearestTree = tree;
+				else if (nearestTree != null && Math.abs(tree.x - x) < Math.abs(nearestTree.x - x)
+						&& Math.abs(tree.x - myHouse.x) < 300 && Math.abs(tree.x - x) < 200)
+					nearestTree = tree;
+			} else {
+				if (nearestTree == null)
+					nearestTree = tree;
+				else if (Math.abs(tree.x - x) < Math.abs(nearestTree.x - x))
+					nearestTree = tree;
+			}
 		}
 
 	}
@@ -234,10 +261,18 @@ public class Human {
 	public void findNearestBerry() {
 
 		for (Berry berry : comp.berries) {
-			if (nearestBerry == null)
-				nearestBerry = berry;
-			else if (Math.abs(berry.x - x) < Math.abs(nearestBerry.x - x))
-				nearestBerry = berry;
+			if (hasHouse()) {
+				if (nearestBerry == null && Math.abs(berry.x - myHouse.x) < 300 && Math.abs(berry.x - x) < 300)
+					nearestBerry = berry;
+				else if (nearestBerry != null && Math.abs(berry.x - x) < Math.abs(nearestBerry.x - x)
+						&& Math.abs(berry.x - myHouse.x) < 300 && Math.abs(berry.x - x) < 300)
+					nearestBerry = berry;
+			} else {
+				if (nearestBerry == null)
+					nearestBerry = berry;
+				else if (Math.abs(berry.x - x) < Math.abs(nearestBerry.x - x))
+					nearestBerry = berry;
+			}
 		}
 
 	}
@@ -263,38 +298,60 @@ public class Human {
 	}
 
 	public void buildHouse() {
-		House closeHouse = null;
-		boolean shouldBuild = false;
-		if (comp.houses.size() == 0)
-			shouldBuild = true;
-		else {
-			for (House house : comp.houses) {
-				if (isSimilar(house.creatorGenome)) {
-					closeHouse = house;
-					break;
+		if (!hasHouse()) {
+			House closeHouse = null;
+			boolean shouldBuild = false;
+			if (comp.houses.size() == 0)
+				shouldBuild = true;
+			else {
+				for (House house : comp.houses) {
+					if (isSimilar(house.creatorGenome)) {
+						closeHouse = house;
+						break;
+					}
+				}
+				if (closeHouse != null) {
+					if (Math.abs(closeHouse.x - x) < 100)
+						shouldBuild = true;
+					else {
+						if (closeHouse.x < x)
+							walkLeft();
+						else
+							walkRight();
+					}
+				} else {
+					shouldBuild = true;
 				}
 			}
-		if(closeHouse != null){
-		if (Math.abs(closeHouse.x - x) < 50)
-			shouldBuild = true;
-		else {
-			if (closeHouse.x < x)
+			if (shouldBuild) {
+				House newHouse = new House(genome, (int) x, (int) y);
+				myHouse = newHouse;
+				comp.houses.add(newHouse);
+				for (int i = 0; i < 3; i++) {
+					inventory.remove("log");
+				}
+			}
+		} else {
+			if (x > myHouse.x + 15)
 				walkLeft();
-			else
+			else if (x < myHouse.x + 5)
 				walkRight();
-		}
-		}else{
-			shouldBuild = true;
-		}
-		}
-		if (shouldBuild) {
-			House newHouse = new House(genome, (int) x, (int) y);
-			myHouse = newHouse;
-			comp.houses.add(newHouse);
-			for (int i = 0; i < 3; i++) {
-				inventory.remove("log");
+			else {
+				myHouse.levels++;
+				for (int i = 0; i < 3; i++) {
+					inventory.remove("log");
+				}
 			}
 		}
+	}
+
+	public void runHome() {
+		if (x > myHouse.x + 15)
+			walkLeft();
+		else if (x < myHouse.x + 5)
+			walkRight();
+		else
+			shouldDraw = false;
 	}
 
 	public boolean hasHouse() {
@@ -305,7 +362,7 @@ public class Human {
 		return false;
 	}
 
-	public void goToMatesHouse() {
+	public void goToMate() {
 		if (x > mate.x + 2)
 			walkLeft();
 		else if (x < mate.x - 2)
@@ -396,7 +453,7 @@ public class Human {
 			else
 				eatWeight++;
 		}
-		System.out.println(this);
+		// System.out.println(this);
 	}
 
 	@Override
@@ -420,7 +477,7 @@ public class Human {
 		int splitPoint = Helper.randInt(0, gene1.length());
 		String out = gene1.substring(0, splitPoint) + gene2.substring(splitPoint, gene2.length());
 		char[] temp = out.toCharArray();
-		int num = Helper.randInt(0, temp.length);
+		int num = Helper.randInt(0, temp.length - 1);
 		temp[num] = (char) Helper.randInt(33, 126);
 		genome = "";
 		for (char current : temp) {
@@ -443,7 +500,7 @@ public class Human {
 			if (genome.charAt(i) == gene2.charAt(i))
 				count++;
 		}
-		if (count > 10)
+		if (count > 5)
 			return true;
 		return false;
 	}

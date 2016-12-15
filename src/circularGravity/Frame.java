@@ -1,4 +1,4 @@
-package randomTerrainGen;
+package circularGravity;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,7 +37,7 @@ public class Frame extends JFrame{
 	private final static int ONE_SECOND = 1000;
 	private static Timer timer = null;
 	private int screensizeChangeBuffer = 0;
-	Component theComponent = new Component();
+	public static Component theComponent = new Component();
 	int timer2 = 0;
 	public Frame(String s) throws Exception {
 
@@ -56,9 +56,9 @@ public class Frame extends JFrame{
 		frame.setResizable(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		theComponent.addKeyListener(theComponent);
-		theComponent.addMouseListener(theComponent);
-		theComponent.addMouseMotionListener(theComponent);
-		theComponent.addMouseWheelListener(theComponent);
+		//theComponent.addMouseListener(theComponent);
+		//theComponent.addMouseMotionListener(theComponent);
+		//theComponent.addMouseWheelListener(theComponent);
 		theComponent.setFocusable(true);
 		frame.getContentPane().setBackground(Color.black);
 		theComponent.setDoubleBuffered(true);

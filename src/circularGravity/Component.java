@@ -11,13 +11,14 @@ import javax.swing.JComponent;
 
 public class Component extends JComponent implements KeyListener {
 	Planet start = new Planet(500, 300, 100, .1, Color.cyan);
+	Planet planet2 = new Planet(200, 300, 50, .1, Color.red);
 	Player person = new Player(900, 100, this);
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	ArrayList<Planet> planets = new ArrayList<Planet>();
 
 	public Component() {
 		planets.add(start);
-
+		planets.add(planet2);
 	}
 
 	@Override

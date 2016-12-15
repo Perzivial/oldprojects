@@ -27,15 +27,26 @@ public class Component extends JComponent implements KeyListener {
 			planet.draw(g);
 		}
 		person.draw(g);
-		if(person.isGrounded){
-			if(keysPressed.contains(KeyEvent.VK_A))
+
+			
+			if (keysPressed.contains(KeyEvent.VK_A))
 				person.walkRight();
-			if(keysPressed.contains(KeyEvent.VK_D))
+			if (keysPressed.contains(KeyEvent.VK_D))
 				person.walkLeft();
-			if(keysPressed.contains(KeyEvent.VK_W))
-				person.jump();
+
+		if (keysPressed.contains(KeyEvent.VK_W)) {
+			person.jump();
+		}else if(person.isGrounded){
+			person.attachToPlanet();
 		}
 		person.finalizeMovement();
+		
+	}
+
+	public boolean iskeyDown(int key) {
+		if (keysPressed.contains(key))
+			return true;
+		return false;
 	}
 
 	@Override
@@ -47,7 +58,6 @@ public class Component extends JComponent implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		keysPressed.add(e.getKeyCode());
-
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
+import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
@@ -16,7 +17,7 @@ public class Player {
 	Planet nearestPlanet = null;
 	Component comp;
 	boolean isGrounded = false;
-
+	int snapCoolDown = 60;
 	public Player(double posx, double posy, Component myComp) {
 		x = posx;
 		y = posy;
@@ -56,8 +57,8 @@ public class Player {
 
 	public void gravity() {
 
-		velX += nearestPlanet.gravity * -Math.sin(getRotationToNearestPlanet());
-		velY += nearestPlanet.gravity * -Math.cos(getRotationToNearestPlanet());
+		velX -= nearestPlanet.gravity * Math.sin(getRotationToNearestPlanet());
+		velY -= nearestPlanet.gravity * Math.cos(getRotationToNearestPlanet());
 
 	}
 
@@ -72,13 +73,13 @@ public class Player {
 		if (area1.isEmpty()) {
 			gravity();
 			isGrounded = false;
-		} else {
+		} else if(snapCoolDown <= 0){
 			velX = 0;
 			velY = 0;
-
 			isGrounded = true;
 		}
-
+		if(snapCoolDown >= 0)
+			snapCoolDown --;
 	}
 
 	public double getRotationToNearestPlanet() {
@@ -87,32 +88,40 @@ public class Player {
 			double xDiff = x - nearestPlanet.centre.getX();
 			double yDiff = y - nearestPlanet.centre.getY();
 			out = Math.atan2(xDiff, yDiff);
-			System.out.println(out);
+
 		}
 		return out;
 	}
 
 	public void walkRight() {
+		if (isGrounded) {
 		velX = 3 * Math.sin(getRotationToNearestPlanet() + 90);
 		velY = 3 * Math.cos(getRotationToNearestPlanet() + 90);
-		attachToPlanet();
+		}
 	}
 
 	public void walkLeft() {
+		if (isGrounded) {
 		velX = 3 * Math.sin(getRotationToNearestPlanet() - 90);
 		velY = 3 * Math.cos(getRotationToNearestPlanet() - 90);
-		attachToPlanet();
+		}
 	}
 
 	public void jump() {
-		velX += 5 * Math.sin(getRotationToNearestPlanet());
-		velY += 5 * Math.cos(getRotationToNearestPlanet());
+			
+		if (isGrounded) {
+			velX += 3 * Math.sin(getRotationToNearestPlanet());
+			velY += 3 * Math.cos(getRotationToNearestPlanet());
+			snapCoolDown = 60;
+		
+		}
 	}
 
 	public void attachToPlanet() {
-		if (isGrounded) {
+		if (isGrounded && snapCoolDown <= 0 && !comp.iskeyDown(KeyEvent.VK_W)) {
 			x = nearestPlanet.centre.getX() + Math.sin(getRotationToNearestPlanet()) * (nearestPlanet.radius + 10);
 			y = nearestPlanet.centre.getY() + Math.cos(getRotationToNearestPlanet()) * (nearestPlanet.radius + 10);
+
 		}
 	}
 

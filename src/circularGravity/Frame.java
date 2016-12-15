@@ -70,7 +70,7 @@ public class Frame extends JFrame{
 
 		setLayout(new FlowLayout()); // set the layout manager
 		
-		timer = new Timer(ONE_SECOND / 300, new ActionListener() {
+		timer = new Timer(ONE_SECOND / 60, new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
 

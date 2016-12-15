@@ -2,6 +2,7 @@ package circularGravity;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.RoundRectangle2D;
@@ -23,5 +24,7 @@ public class Planet {
 	public void draw(Graphics g){
 		g.setColor(color);
 		g.drawOval((int)(centre.getX()-radius), (int)(centre.getY()-radius), (int)radius*2, (int) radius*2);
+	Graphics2D g2 = (Graphics2D) g;
+	g2.fill(rect);
 	}
 }

@@ -42,6 +42,7 @@ public class Component extends JComponent
 	ArrayList<Human> humans = new ArrayList<Human>();
 
 	ArrayList<Human> toAdd = new ArrayList<Human>();
+	ArrayList<Human> toRemove = new ArrayList<Human>();
 	int tick = 1000;
 	int time = 30;
 	Rectangle screenRect = new Rectangle(0, 0, 1000, 600);
@@ -72,19 +73,20 @@ public class Component extends JComponent
 		Graphics2D g2 = (Graphics2D) g;
 		AffineTransform old = g2.getTransform();
 		toAdd.clear();
+		toRemove.clear();
 		g.setColor(getSkyColor());
 		g.fillRect(0, 0, 1000, 600);
 		g2.scale(zoomAmount, zoomAmount);
 		g2.translate(translateX, translateY);
-		if (shouldDraw) {
+
 			for (House house : houses) {
 				house.draw(g2);
 			}
-
-			for (Block block : blocks) {
-				block.draw(g2);
-			}
-
+		
+		for (Block block : blocks) {
+			block.draw(g2);
+		}
+		if (shouldDraw) {
 			for (Tree tree : trees) {
 				tree.draw(g2);
 			}
@@ -99,6 +101,7 @@ public class Component extends JComponent
 		}
 		villageDetector();
 		humans.addAll(toAdd);
+		humans.removeAll(toRemove);
 		controlStuff();
 		tick--;
 		if (tick <= 0) {
@@ -203,7 +206,7 @@ public class Component extends JComponent
 	}
 
 	public void villageDetector() {
-		Color clr = Helper.randomrainbowcolor(.9f);
+		Color clr = new Color(Helper.randInt(0, 255), Helper.randInt(0, 255), Helper.randInt(0, 255));
 		for (House house : houses) {
 			ArrayList<House> village = new ArrayList<House>();
 			village.add(house);

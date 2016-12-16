@@ -35,6 +35,8 @@ public class Human {
 	int age = 0;
 	boolean shouldDraw = true;
 
+	Human target = null;
+
 	public Human(int eat, int tree, int build, int steal) {
 		eatWeight = eat;
 		treeWeight = tree;
@@ -97,6 +99,21 @@ public class Human {
 
 	public void die() {
 		isDead = true;
+		comp.toRemove.add(this);
+	}
+
+	public void getClosestNonVillagePlayer() {
+		Human temp = null;
+		if(inventory.isEmpty())
+		for (Human human : comp.humans) {
+			if(human != this)
+			if (!human.clr.equals(clr)) {
+				if (Math.abs(x - human.x) < 100) {
+					temp = human;
+				}
+			}
+		}
+		target = temp;
 	}
 
 	public void hunger() {
@@ -179,26 +196,47 @@ public class Human {
 			multiplyNum = Integer.MIN_VALUE;
 
 		int homeNum = (comp.getSkyColor().getBlue() < 60 && hasHouse()) ? 15 : Integer.MIN_VALUE;
-
-		switch (Helper.weigh(eatNum, treeNum, buildNum, multiplyNum, homeNum) + 1) {
-		case 1:
-			goToNearestBerry();
-			break;
-		case 2:
-			goToNearestTree();
-			break;
-		case 3:
-			buildHouse();
-			break;
-		case 4:
-			scream();
-			break;
-		case 5:
-			runHome();
-			break;
+		if (target == null) {
+			switch (Helper.weigh(eatNum, treeNum, buildNum, multiplyNum, homeNum) + 1) {
+			case 1:
+				goToNearestBerry();
+				break;
+			case 2:
+				goToNearestTree();
+				break;
+			case 3:
+				buildHouse();
+				break;
+			case 4:
+				scream();
+				break;
+			case 5:
+				runHome();
+				break;
+			}
+		} else {
+			attackTarget();
 		}
 	}
-
+	
+	public void attackTarget(){
+		if(x < target.x - 2)
+			walkRight();
+		else if(x > target.x + 2)
+			walkLeft();
+		else{
+			attack(target);
+		}
+			
+	}
+	
+	public void attack(Human human){
+		human.health -= 0.6666666667;
+		if(human.health < 0){
+			human.die();
+		}
+	}
+	
 	public void scream() {
 		screamCounter = 60;
 
@@ -207,7 +245,7 @@ public class Human {
 	public int amountOfMatesInArea() {
 		int count = 0;
 		for (Human human : comp.humans) {
-			if (human.sex == !sex && human.age > 2000)
+			if (human.age > 2000 && human.clr.equals(clr))
 				count++;
 		}
 		return count;
@@ -308,7 +346,7 @@ public class Human {
 				shouldBuild = true;
 			else {
 				for (House house : comp.houses) {
-					if (isSimilar(house.creatorGenome)) {
+					if (isSimilar(house.creatorGenome) || house.clr.equals(clr)) {
 						closeHouse = house;
 						break;
 					}
@@ -376,6 +414,7 @@ public class Human {
 			inventory.remove("berry");
 			inventory.remove("berry");
 			inventory.remove("berry");
+			
 		}
 
 	}
@@ -386,8 +425,13 @@ public class Human {
 
 			child.x = x;
 			child.y = y - 10;
+			child.clr = clr;
+			for(int i = 0; i < 5; i ++){
+				child.inventory.add("log");
+				child.inventory.add("berry");
+			}
 			comp.toAdd.add(child);
-
+			
 		}
 		mate = null;
 	}
@@ -398,22 +442,24 @@ public class Human {
 
 			findNearestTree();
 			findNearestBerry();
-
+			getClosestNonVillagePlayer();
 			updateTimer = 20;
 		}
 		if (screamCounter > 0) {
 
 			for (Human human : comp.humans) {
-				if (human.sex = !sex && human != this) {
+
 					if (human.screamCounter > 0) {
+						if(human.clr.equals(clr)){
 						if (mate == null)
 							mate = human;
 						else {
 							if (Math.abs(human.x - x) < Math.abs(mate.x - x))
 								mate = human;
 						}
+						}
 					}
-				}
+				
 			}
 		}
 	}

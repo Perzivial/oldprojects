@@ -8,7 +8,9 @@ import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
 public class Player {
@@ -16,9 +18,9 @@ public class Player {
 	double velX = 0, velY = 0;
 	Polygon myShape = new Polygon();
 	Planet nearestPlanet = null;
-	Component comp;
+	public static Component comp;
 	boolean isGrounded = false;
-	int snapCoolDown = 60;
+	int snapCoolDown = 2;
 	double angle = 0;
 
 	public Player(double posx, double posy, Component myComp) {
@@ -63,23 +65,32 @@ public class Player {
 
 	public void gravity() {
 		Point2D point = new Point2D.Double(x + 10, y + 40);
-		velX -= (nearestPlanet.gravity) * Math.sin(getRotationToNearestPlanet());
-		velY -= (nearestPlanet.gravity) * Math.cos(getRotationToNearestPlanet());
+		velX -= (nearestPlanet.gravity/(distanceToNearestPlanet()/2)) * Math.sin(getRotationToNearestPlanet());
+		velY -= (nearestPlanet.gravity/(distanceToNearestPlanet()/2)) * Math.cos(getRotationToNearestPlanet());
 
 	}
-
+	
+	public double distanceToNearestPlanet(){
+		return bottom().distance(nearestPlanet.centre)-nearestPlanet.radius;
+	}
+	public Point2D bottom(){
+		return new Point2D.Double((x )+Math.sin(getRotationToNearestPlanet())*-10, (y)+Math.cos(getRotationToNearestPlanet())*-10);
+	}
 	public void move() {
 		if (!isGrounded)
 			rotateToNearest();
-
+	
 		Area area1 = new Area(setShapeAngle());
 		Area area2 = new Area(nearestPlanet.rect);
 
 		area1.intersect(area2);
-		if (area1.isEmpty()) {
+		if (distanceToNearestPlanet() > 5) {
+			if (snapCoolDown <= 0)
 			gravity();
 			isGrounded = false;
 		} else if (snapCoolDown <= 0) {
+			if(!comp.iskeyDown(KeyEvent.VK_W))
+			attachToPlanet();
 			velX = 0;
 			velY = 0;
 			isGrounded = true;
@@ -119,8 +130,7 @@ public class Player {
 		if (isGrounded) {
 			velX += 5 * Math.sin(getRotationToNearestPlanet());
 			velY += 5 * Math.cos(getRotationToNearestPlanet());
-			snapCoolDown = 60;
-
+			snapCoolDown = 2;
 		}
 	}
 
@@ -128,7 +138,6 @@ public class Player {
 		if (isGrounded && snapCoolDown <= 0 && !comp.iskeyDown(KeyEvent.VK_W)) {
 			x = nearestPlanet.centre.getX() + Math.sin(getRotationToNearestPlanet()) * (nearestPlanet.radius + 10);
 			y = nearestPlanet.centre.getY() + Math.cos(getRotationToNearestPlanet()) * (nearestPlanet.radius + 10);
-
 		}
 	}
 
@@ -146,5 +155,9 @@ public class Player {
 		// g2.drawLine((int) x, (int) y, (int) (x + (20 *
 		// Math.sin(getRotationToNearestPlanet()))), (int) (y + (20 *
 		// Math.cos(getRotationToNearestPlanet()))));
+		g2.setColor(Color.red);
+			
+		g2.fill(new Rectangle2D.Double(bottom().getX()-2, bottom().getY()-2, 4, 4));
+	
 	}
 }

@@ -62,15 +62,9 @@ public class Component extends JComponent implements KeyListener,MouseListener,M
 			planet.draw(g);
 			
 		}
-		
+		drawBullets(g2);
 		person.draw(g);
-		ArrayList<Bullet> removeBullet = new ArrayList<Bullet>();
-		for(Bullet bullet:bullets){
-			bullet.draw(g2);
-			if(bullet.lifeTime<= 0)
-				removeBullet.add(bullet);
-		}
-		bullets.removeAll(removeBullet);
+
 
 		//System.out.println((new Point2D.Double((person.x+10)*Math.sin(person.angle), (person.y+10)*Math.sin(person.angle)).distance(person.nearestPlanet.centre)));
 		if (keysPressed.contains(KeyEvent.VK_A))
@@ -91,9 +85,24 @@ public class Component extends JComponent implements KeyListener,MouseListener,M
 			//angle -= .02;
 			person.shootingAngle += .1;			
 		}if(iskeyDown(KeyEvent.VK_UP)){
-			bullets.add(new Bullet(person.x,person.y,person.velX + 5*Math.sin(person.angle + person.shootingAngle),person.velY +5*Math.cos( person.angle + person.shootingAngle)));
+			bullets.add(new Bullet(person.x,person.y,person.velX + 5*Math.sin(person.shootingAngle),person.velY +5*Math.cos(person.shootingAngle)));
 		}
 		
+	}
+	
+	public void drawBullets(Graphics2D g2){
+		ArrayList<Bullet> removeBullet = new ArrayList<Bullet>();
+		for(Bullet bullet:bullets){
+			bullet.draw(g2);
+			if(bullet.lifeTime<= 0){
+				removeBullet.add(bullet);
+			}
+			for(Planet planet : planets){
+				if(bullet.distanceToPlanet(planet) <= 0)
+					removeBullet.add(bullet);
+			}
+		}
+		bullets.removeAll(removeBullet);
 	}
 	
 	public void addPlanetSafely(){

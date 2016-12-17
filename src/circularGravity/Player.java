@@ -208,10 +208,9 @@ public class Player {
 		Graphics2D g4 = (Graphics2D) g.create();
 		
 		g4.translate(x, y);
-		g4.rotate(-angle);
 		g4.rotate(-shootingAngle);
 		g4.translate(-8, -8);
-		g4.drawRect(6, 6, 5, 10);
+		g4.fillRect(6, 6, 5, 10);
 		//g3.drawLine((int)10, (int)10, (int)((15) + 10 * Math.sin(shootingAngle)), (int)((15) +10 * Math.cos(shootingAngle)));
 		// g2.drawLine((int) x, (int) y, (int) (x + (20 *
 		// Math.sin(getRotationToNearestPlanet()))), (int) (y + (20 *

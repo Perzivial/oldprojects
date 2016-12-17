@@ -24,7 +24,7 @@ public class Player {
 	boolean isGrounded = false;
 	int snapCoolDown = 2;
 	double angle = 0;
-	
+	double shootingAngle = 0;
 	public Player(double posx, double posy, Component myComp) {
 		x = posx;
 		y = posy;
@@ -183,7 +183,7 @@ public class Player {
 		if (angle > 0 && getRotationToNearestPlanet() < 0)
 			angle *= -1;
 		angle = (angle + getRotationToNearestPlanet()) / 2;
-
+		
 	}
 
 	public void draw(Graphics g) {
@@ -202,14 +202,23 @@ public class Player {
 		g3.setColor(Color.orange.darker());
 		g3.fill(new Rectangle(7, 0, 7, 10));
 		g3.setColor(Color.orange);
+	
 		g3.fill(new RoundRectangle2D.Double(5.5, 9, 10, 10, 10, 10));
-
+		g3.setColor(Color.red);
+		Graphics2D g4 = (Graphics2D) g.create();
+		
+		g4.translate(x, y);
+		g4.rotate(-angle);
+		g4.rotate(-shootingAngle);
+		g4.translate(-8, -8);
+		g4.drawRect(6, 6, 5, 10);
+		//g3.drawLine((int)10, (int)10, (int)((15) + 10 * Math.sin(shootingAngle)), (int)((15) +10 * Math.cos(shootingAngle)));
 		// g2.drawLine((int) x, (int) y, (int) (x + (20 *
 		// Math.sin(getRotationToNearestPlanet()))), (int) (y + (20 *
 		// Math.cos(getRotationToNearestPlanet()))));
 		g2.setColor(Color.red);
-
+		
 		g2.fill(new Rectangle2D.Double(bottom().getX() - 2, bottom().getY() - 2, 4, 4));
-
+		
 	}
 }

@@ -56,8 +56,8 @@ public class Frame extends JFrame{
 		frame.setResizable(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		theComponent.addKeyListener(theComponent);
-		//theComponent.addMouseListener(theComponent);
-		//theComponent.addMouseMotionListener(theComponent);
+		theComponent.addMouseListener(theComponent);
+	theComponent.addMouseMotionListener(theComponent);
 		//theComponent.addMouseWheelListener(theComponent);
 		theComponent.setFocusable(true);
 		frame.getContentPane().setBackground(Color.black);

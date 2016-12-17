@@ -3,6 +3,7 @@ package circularGravity;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
@@ -27,10 +28,10 @@ public class Component extends JComponent implements KeyListener {
 		planet2.orbitPlanet = start;
 		planet2.orbitDistance = 300;
 		planet3.orbitSpeed = 2;
-		planets.add(start);
-		planets.add(planet2);
+		//planets.add(start);
+		//planets.add(planet2);
 		for(int i = 0; i < 100; i ++){
-			 //addPlanetSafely();
+			 addPlanetSafely();
 		}
 		//planets.add(planet3);
 
@@ -38,18 +39,21 @@ public class Component extends JComponent implements KeyListener {
 
 	@Override
 	public void paintComponent(Graphics g) {
-
+	
 		Graphics2D g2 = (Graphics2D) g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 		
-
 		g2.translate(-person.x, -person.y);
 		g2.translate(500, 200);
 		AffineTransform old = g2.getTransform();
+		
 		old.translate(person.x+10, person.y + 10);
 		old.rotate(angle);
 		old.translate(-(person.x-10), -(person.y + 10));
 
 		g2.setTransform(old);
+		g2.translate(-person.x, -person.y);
+		g2.scale(2, 2);
 		for (Planet planet : planets) {
 
 			planet.draw(g);
@@ -79,7 +83,7 @@ public class Component extends JComponent implements KeyListener {
 	}
 	
 	public void addPlanetSafely(){
-		Planet newPlanet = new Planet((double)Helper.randInt(-1000,1000),(double)Helper.randInt(-1000,1000),(double)Helper.randInt(50, 100), (double)(Helper.randInt(1,3))/10,Helper.randomrainbowcolor(.6f));
+		Planet newPlanet = new Planet((double)Helper.randInt(-1000,1000),(double)Helper.randInt(-1000,1000),(double)Helper.randInt(50, 100), (double)(Helper.randInt(10,30))/10,Helper.randomrainbowcolor(.6f));
 		boolean shouldAdd = true;
 		for(Planet planet:planets){
 			if(newPlanet.centre.distance(planet.centre) < planet.radius *2+ newPlanet.radius*2)

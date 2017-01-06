@@ -196,7 +196,7 @@ public class Human {
 			multiplyNum = Integer.MIN_VALUE;
 
 		int homeNum = (comp.getSkyColor().getBlue() < 60 && hasHouse()) ? 15 : Integer.MIN_VALUE;
-		if (target == null) {
+		//if (target == null) {
 			switch (Helper.weigh(eatNum, treeNum, buildNum, multiplyNum, homeNum) + 1) {
 			case 1:
 				goToNearestBerry();
@@ -214,9 +214,9 @@ public class Human {
 				runHome();
 				break;
 			}
-		} else {
-			attackTarget();
-		}
+		//} //else {
+			//attackTarget();
+		//}
 	}
 	
 	public void attackTarget(){

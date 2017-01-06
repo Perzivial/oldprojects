@@ -1,4 +1,4 @@
-package Meep;
+package perspectiveDrawing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -59,7 +59,7 @@ public class Frame extends JFrame {
 		// theComponent.addMouseWheelListener(theComponent);
 		theComponent.setFocusable(true);
 
-		frame.getContentPane().setBackground(Color.black);
+		frame.getContentPane().setBackground(Color.cyan);
 		theComponent.setDoubleBuffered(true);
 		theComponent.setVisible(true);
 
@@ -69,7 +69,7 @@ public class Frame extends JFrame {
 
 		setLayout(new FlowLayout()); // set the layout manager
 
-		timer = new Timer(ONE_SECOND / 600, new ActionListener() {
+		timer = new Timer(ONE_SECOND / 30, new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 

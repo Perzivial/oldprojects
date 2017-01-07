@@ -3,12 +3,16 @@ package perspectiveDrawing;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.Line2D;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -17,7 +21,7 @@ public class Player {
 	double angle = 0;
 	double x;
 	double y;
-	private int resolution = 100;
+	private double resolution = 500;
 	private int focalLength = 500;
 	public static final int WALL_HEIGHT = 500;
 
@@ -155,6 +159,28 @@ public class Player {
 		g.fill(area);
 		return new Point2D.Double(area.getBounds2D().getX(), area.getBounds2D().getY());
 	}
+	public double getDistToRect(Line2D line, Pixel pixel, double step){
+		ArrayList<Point2D> points = new ArrayList<Point2D>();
+		Line2D sideLine1 = new Line2D.Double(pixel.x, pixel.y, pixel.x + 10, pixel.y);
+		Line2D sideLine2 = new Line2D.Double(pixel.x, pixel.y + 10, pixel.x + 10, pixel.y + 10);
+		Line2D sideLine3 = new Line2D.Double(pixel.x, pixel.y, pixel.x, pixel.y + 10);
+		Line2D sideLine4 = new Line2D.Double(pixel.x + 10, pixel.y, pixel.x+10, pixel.y + 10);
+		Point2D point1 = lineIntersect(line,sideLine1);
+		Point2D point2 = lineIntersect(line,sideLine2);
+		Point2D point3 = lineIntersect(line,sideLine3);
+		Point2D point4 = lineIntersect(line,sideLine4);
+		ArrayList<Double> dists = new ArrayList<Double>();
+		if(point1 != null)
+		dists.add(line.getP1().distance(point1));
+		if(point2 != null)
+		dists.add(line.getP1().distance(point2));
+		if(point3 != null)
+		dists.add(line.getP1().distance(point3));
+		if(point4 != null)
+		dists.add(line.getP1().distance(point4));
+		Collections.sort(dists);
+		return dists.get(0);
+	}
 	// draws a specified number of rays to hit stuff and draw them accordingly
 	public void drawRays(Graphics g) {
 
@@ -181,12 +207,44 @@ public class Player {
 					//getPointRectIntersectPoint(line, pixel.rect,(Graphics2D)g.create());
 					pixel.dist = Double.MAX_VALUE;
 					try{
-					pixel.dist = getDist(line,pixel.rect,.1);
-					System.out.println(pixel.dist);
+					//pixel.dist = getDist(line,pixel.rect,.1);
+						//TODO the distance 
+						
+						pixel.dist = getDistToRect(line,pixel,1);
+						System.out.println(pixel.dist);
+					//System.out.println(pixel.dist);
 					g2.draw(new Line2D.Double(line.getP1(), new Point2D.Double(line.getX1()+ (pixel.dist*Math.sin(Math.toRadians(tempangle))),line.getX1()+ (pixel.dist*Math.cos(Math.toRadians(tempangle))))));
+					
+					
+					Line2D sideLine1 = new Line2D.Double(pixel.x, pixel.y, pixel.x + 10, pixel.y);
+					Point2D point = lineIntersect(line,sideLine1);
+					
+
+					//g2.draw(shape);
+					//g2.fillRect(point.getX(), (int)line2.getY2(),5, 5);
 					}catch(Exception e){
 						
 					}
+					/*
+					FlatteningPathIterator it = new FlatteningPathIterator(line.getPathIterator(g2.getTransform()),1);
+					 float[] coords=new float[2];
+					 ArrayList<Point2D> points = new ArrayList<Point2D>();
+					 while (!it.isDone()) {
+						
+			                it.currentSegment(coords);
+			                int x=(int)coords[0];
+			                int y=(int)coords[1];
+			                points.add(new Point2D.Double(x,y));
+			                it.next();
+			             
+			            }
+					 for(Point2D pointTemp : points){
+						 System.out.println(pointTemp.getX() + " ,"  + pointTemp.getY());
+						 g2.setColor(Color.red);
+						 g2.drawRect((int)pointTemp.getX()-1,(int)pointTemp.getY()-1,2,2);
+					 }
+					*/
+
 				}
 			}
 			// comp.sortPixelsByDistance();
@@ -208,7 +266,7 @@ public class Player {
 						//g4.fillRect((int) tempX - 1, (int) tempY - 1, 2, 2);
 						//System.out.println(line.getP1().distance(lineIntersectPoint(line, sideLine1)));
 					}
-
+					
 					Point2D intersectFaceUp = lineIntersectPoint(line, sideLine1);
 					Point2D intersectFaceDown = lineIntersectPoint(line, sideLine1);
 					Point2D intersectFaceLeft = lineIntersectPoint(line, sideLine3);
@@ -246,7 +304,7 @@ public class Player {
 					try{
 					g3.translate(0, -((WALL_HEIGHT / ((int) pixel.dist / 5)) / 2));
 					g3.fillRect((int) ((double) 1000 / (double) resolution) * i, 50 + (int) pixel.dist,
-							(1000 / resolution), WALL_HEIGHT / ((int) pixel.dist / 5));
+							(int)(1000 / resolution), WALL_HEIGHT / ((int) pixel.dist / 5));
 					}catch(java.lang.ArithmeticException e){
 						
 					}
@@ -259,39 +317,6 @@ public class Player {
 				}
 			}
 
-			/*
-			 * Pixel closestPixel = null; for (Pixel pixel : comp.pixels) { if
-			 * (closestPixel == null) closestPixel = pixel; if
-			 * (closestPixel.dist > pixel.dist) closestPixel = pixel; } try { if
-			 * (line.intersects(closestPixel.rect)) {
-			 * g.setColor(closestPixel.color); g.fillRect((int) ((double) 1000 /
-			 * (double) resolution) * i, 50 + (int) closestPixel.dist, 100, 350
-			 * - (int) closestPixel.dist); } } catch (Exception e) {
-			 * 
-			 * }
-			 */
-			/*
-			 * for (Pixel pixel : comp.pixels) { if
-			 * (line.intersects(pixel.rect)) { double distance =
-			 * line.getP1().distance(new Point2D.Double(pixel.x+5,pixel.y+5)) +
-			 * 1;
-			 * 
-			 * AffineTransform form = new AffineTransform();
-			 * 
-			 * //Graphics2D g3 = (Graphics2D) g.create(); // try{ g.setColor(new
-			 * Color(pixel.color.getRed()+ Helper.randInt(-5,
-			 * 5),pixel.color.getGreen()+ Helper.randInt(-5,
-			 * 5),pixel.color.getBlue() + Helper.randInt(-5, 5)));
-			 * }catch(Exception e){ g.setColor(pixel.color); } int posx = 0;
-			 * //System.out.println(distance); if(distance < lowestDist){
-			 * 
-			 * lowestDist = distance; System.out.println("fasf"); } break; }
-			 * 
-			 * 
-			 * } if(lowestDist != Double.POSITIVE_INFINITY)
-			 * g.fillRect((int)((double)1000/(double)resolution)*i, 50+
-			 * (int)lowestDist, 100, 350 - (int)lowestDist);
-			 */
 		}
 	}
 
@@ -317,4 +342,29 @@ public class Player {
 		return new Point2D.Double(xi, yi);
 
 	}
+	   public static Point2D lineIntersect(Line2D line1, Line2D line2) {
+			double x1 = line1.getX1();
+			double x2 = line1.getX2();
+			double y1 = line1.getY1();
+			double y2 = line1.getY2();
+
+			double x3 = line2.getX1();
+			double x4 = line2.getX2();
+			double y3 = line2.getY1();
+			double y4 = line2.getY2();
+		   
+		   
+		   double denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+		   if (denom == 0.0) { // Lines are parallel.
+		      return null;
+		   }
+		   double ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3))/denom;
+		   double ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3))/denom;
+		     if (ua >= 0.0f && ua <= 1.0f && ub >= 0.0f && ub <= 1.0f) {
+		         // Get the intersection point.
+		         return new Point2D.Double((int) (x1 + ua*(x2 - x1)), (int) (y1 + ua*(y2 - y1)));
+		     }
+
+		   return null;
+		   }
 }

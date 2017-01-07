@@ -386,7 +386,7 @@ public class Player {
 						blue = 255;
 					if (blue < 0)
 						blue = 0;
-					// g3.setColor(new Color(red, green, blue));
+					 g3.setColor(new Color(red, green, blue));
 					g3.translate(0, 350);
 					g3.translate(0, -pixel.dist);
 					try {

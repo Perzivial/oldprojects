@@ -16,7 +16,7 @@ public class Component extends JComponent implements KeyListener {
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	public Component() {
 		pixels.add(new Pixel(20, 5, Color.ORANGE));
-		pixels.add(new Pixel(20, 20, Color.DARK_GRAY));
+		pixels.add(new Pixel(20, 20, Color.green));
 	}
 
 	@Override

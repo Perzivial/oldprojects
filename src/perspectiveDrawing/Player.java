@@ -16,7 +16,7 @@ public class Player {
 	double y;
 	private int resolution = 100;
 	private int focalLength = 500;
-
+	public static final int WALL_HEIGHT = 500;
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;
@@ -77,7 +77,7 @@ public class Player {
 					x + 5 + (focalLength * Math.sin(Math.toRadians(tempangle))),
 					y + 5 + (focalLength * Math.cos(Math.toRadians(tempangle))));
 			Graphics2D g2 = (Graphics2D) g.create();
-			// g2.draw(line);
+			g2.draw(line);
 
 			for (Pixel pixel : comp.pixels) {
 				if (line.intersects(pixel.rect)) {
@@ -89,12 +89,67 @@ public class Player {
 			//Collections.reverse(comp.pixels);
 			for (Pixel pixel : comp.pixels) {
 				if (line.intersects(pixel.rect)) {
-					g.setColor(pixel.color);
-					g.fillRect((int) ((double) 1000 / (double) resolution) * i, 50 + (int) pixel.dist, (1000/resolution),
-							350 - (int) pixel.dist);
+					Graphics2D g3 = (Graphics2D) g.create();
+					Line2D sideLine1 = new Line2D.Double(pixel.x,pixel.y,pixel.x + 10,pixel.y);
+					Line2D sideLine2 = new Line2D.Double(pixel.x,pixel.y+10,pixel.x + 10,pixel.y+10);
+					Line2D sideLine3 = new Line2D.Double(pixel.x,pixel.y,pixel.x,pixel.y+10);
+					Line2D sideLine4 = new Line2D.Double(pixel.x+10,pixel.y,pixel.x,pixel.y+10);
+					if(line.intersectsLine(sideLine1)){
+					double tempX = lineIntersectPoint(line,sideLine1).getX();
+					double tempY = lineIntersectPoint(line,sideLine1).getY();
+					
+					Graphics2D g4 = (Graphics2D) g.create();
+					g4.setColor(Color.red);
+					g4.fillRect( (int)tempX-1,  (int)tempY-1, 2, 2);
+					System.out.println(line.getP1().distance(lineIntersectPoint(line,sideLine1)));
+					}
+					
+					Point2D intersectFaceUp = lineIntersectPoint(line,sideLine1);
+					Point2D intersectFaceDown = lineIntersectPoint(line,sideLine1);
+					Point2D intersectFaceLeft = lineIntersectPoint(line,sideLine3);
+					Point2D intersectFaceRight = lineIntersectPoint(line,sideLine4);
+					
+					if(line.intersectsLine(sideLine1)&&line.intersectsLine(sideLine2))
+					g3.setColor(pixel.color);
+					else if(line.intersectsLine(sideLine3)&&line.intersectsLine(sideLine4))
+						g3.setColor(pixel.color.darker());
+					else if(line.intersectsLine(sideLine1)&&line.intersectsLine(sideLine3)){
+						if(intersectFaceUp.distance(line.getP1())<intersectFaceLeft.distance(line.getP1()))
+							g3.setColor(pixel.color);
+						else 
+							g3.setColor(pixel.color.darker());
+					}else if(line.intersectsLine(sideLine1)&&line.intersectsLine(sideLine4)){
+						if(intersectFaceUp.distance(line.getP1())<intersectFaceRight.distance(line.getP1()))
+							g3.setColor(pixel.color);
+						else 
+							g3.setColor(pixel.color.darker());
+					}else if(line.intersectsLine(sideLine2)&&line.intersectsLine(sideLine3)){
+						if(intersectFaceDown.distance(line.getP1())<intersectFaceLeft.distance(line.getP1()))
+							g3.setColor(pixel.color);
+						else 
+							g3.setColor(pixel.color.darker());
+					}else if(line.intersectsLine(sideLine2)&&line.intersectsLine(sideLine4)){
+						if(intersectFaceDown.distance(line.getP1())<intersectFaceRight.distance(line.getP1()))
+							g3.setColor(pixel.color);
+						else 
+							g3.setColor(pixel.color.darker());
+					}else
+						g3.setColor(pixel.color);
+						
+						
+						
+						
+						
+					g3.translate(0, 350);
+					g3.translate(0, -pixel.dist);
+					g3.translate(0, -((WALL_HEIGHT / ((int) pixel.dist/5))/2));
+					g3.fillRect((int) ((double) 1000 / (double) resolution) * i, 50 + (int) pixel.dist, (1000/resolution),WALL_HEIGHT / ((int) pixel.dist/5));
+					//g3.fillRect((int) ((double) 1000 / (double) resolution) * i, 50 + (int) pixel.dist, (1000/resolution),350 - (int) pixel.dist);
+		
 					break;
 				}
 			}
+			
 			/*
 			 * Pixel closestPixel = null; for (Pixel pixel : comp.pixels) { if
 			 * (closestPixel == null) closestPixel = pixel; if
@@ -129,5 +184,30 @@ public class Player {
 			 * (int)lowestDist, 100, 350 - (int)lowestDist);
 			 */
 		}
+	}
+	public Point2D lineIntersectPoint  (Line2D line1, Line2D line2){
+		double x1 = line1.getX1();
+		double x2 = line1.getX2();
+		double y1 = line1.getY1();
+		double y2 = line1.getY2();
+		
+		double x3 = line2.getX1();
+		double x4 = line2.getX2();
+		double y3 = line2.getY1();
+		double y4 = line2.getY2();
+		double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+		
+		    if (d == 0) return null;
+		
+		 
+		
+		    double xi = ((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d;
+		
+		    double yi = ((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d;
+		
+		
+		    return new Point2D.Double(xi,yi);
+
+		
 	}
 }

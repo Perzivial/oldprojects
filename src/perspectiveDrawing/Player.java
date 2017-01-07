@@ -14,7 +14,7 @@ public class Player {
 	double angle = 0;
 	double x;
 	double y;
-	private int resolution = 200;
+	private int resolution = 100;
 	private int focalLength = 500;
 
 	public Player(double xpos, double ypos, double ang, Component myComp) {
@@ -84,31 +84,28 @@ public class Player {
 					pixel.dist = line.getP1().distance(new Point2D.Double(pixel.x + 5, pixel.y + 5)) + 1;
 				}
 			}
-			comp.sortPixelsByDistance();
+			//comp.sortPixelsByDistance();
+			Collections.sort(comp.pixels);
 			Collections.reverse(comp.pixels);
 			for (Pixel pixel : comp.pixels) {
-				if(line.intersects(pixel.rect)){
+				if (line.intersects(pixel.rect)) {
 					g.setColor(pixel.color);
-				g.fillRect((int)((double)1000/(double)resolution)*i, 50+ (int)pixel.dist, 100, 350 - (int)pixel.dist);				
-				}}
-			/*
-			Pixel closestPixel = null;
-			for (Pixel pixel : comp.pixels) {
-				if (closestPixel == null)
-					closestPixel = pixel;
-				if (closestPixel.dist > pixel.dist)
-					closestPixel = pixel;
-			}
-			try {
-				if (line.intersects(closestPixel.rect)) {
-					g.setColor(closestPixel.color);
-					g.fillRect((int) ((double) 1000 / (double) resolution) * i, 50 + (int) closestPixel.dist, 100,
-							350 - (int) closestPixel.dist);
+					g.fillRect((int) ((double) 1000 / (double) resolution) * i, 50 + (int) pixel.dist, (1000/resolution),
+							350 - (int) pixel.dist);
+					//break;
 				}
-			} catch (Exception e) {
-
 			}
-	*/
+			/*
+			 * Pixel closestPixel = null; for (Pixel pixel : comp.pixels) { if
+			 * (closestPixel == null) closestPixel = pixel; if
+			 * (closestPixel.dist > pixel.dist) closestPixel = pixel; } try { if
+			 * (line.intersects(closestPixel.rect)) {
+			 * g.setColor(closestPixel.color); g.fillRect((int) ((double) 1000 /
+			 * (double) resolution) * i, 50 + (int) closestPixel.dist, 100, 350
+			 * - (int) closestPixel.dist); } } catch (Exception e) {
+			 * 
+			 * }
+			 */
 			/*
 			 * for (Pixel pixel : comp.pixels) { if
 			 * (line.intersects(pixel.rect)) { double distance =

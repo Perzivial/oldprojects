@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 
-public class Pixel {
+public class Pixel implements Comparable{
 	double x;
 	double y;
 	Color color;
@@ -19,5 +19,10 @@ public class Pixel {
 	public void draw(Graphics g){
 		g.setColor(color);
 		g.fillRect((int)x, (int)y, 10, 10);
+	}
+	@Override
+	public int compareTo(Object o) {
+		Pixel oPixel = (Pixel) o;
+		return (int)(dist-oPixel.dist);
 	}
 }

@@ -85,6 +85,7 @@ public class Component extends JComponent implements KeyListener {
 	}
 	public void sortPixelsByDistance(){
 		ArrayList<Pixel> tempPixels = new ArrayList<Pixel>();
+		
 		for(Pixel pixel: pixels){
 			if(tempPixels.size() == 0)
 				tempPixels.add(pixel);
@@ -93,12 +94,14 @@ public class Component extends JComponent implements KeyListener {
 					tempPixels.add(pixel);
 				else{
 					try{
-					tempPixels.add(tempPixels.size() - 2,pixel);
+					tempPixels.add(tempPixels.size() - 1,pixel);
 					}catch(Exception e){
 						tempPixels.add(0,pixel);
 					}
 				}
 			}
 		}
+		
+		
 	}
 }

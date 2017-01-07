@@ -83,6 +83,7 @@ public class Component extends JComponent implements KeyListener {
 	public void keyReleased(KeyEvent e) {
 		keysPressed.remove(e.getKeyCode());
 	}
+	//this code doesnt work lol. do not use it sucks
 	public void sortPixelsByDistance(){
 		ArrayList<Pixel> tempPixels = new ArrayList<Pixel>();
 		

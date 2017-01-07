@@ -86,13 +86,13 @@ public class Player {
 			}
 			//comp.sortPixelsByDistance();
 			Collections.sort(comp.pixels);
-			Collections.reverse(comp.pixels);
+			//Collections.reverse(comp.pixels);
 			for (Pixel pixel : comp.pixels) {
 				if (line.intersects(pixel.rect)) {
 					g.setColor(pixel.color);
 					g.fillRect((int) ((double) 1000 / (double) resolution) * i, 50 + (int) pixel.dist, (1000/resolution),
 							350 - (int) pixel.dist);
-					//break;
+					break;
 				}
 			}
 			/*

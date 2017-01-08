@@ -25,7 +25,7 @@ public class Player {
 	double y;
 	private double resolution = 1000;
 	private int focalLength = 250;
-	public static final int WALL_HEIGHT = 200;
+	public static final int WALL_HEIGHT = 100;
 	BufferedImage img = new Image("img/wall.png").img;
 
 	public Player(double xpos, double ypos, double ang, Component myComp) {
@@ -375,9 +375,9 @@ public class Player {
 						g.setColor(pixel.color);
 
 					// g3.setColor(pixel.color);
-					int red = g.getColor().getRed() - (int) pixel.dist * 4;
-					int green = g.getColor().getGreen() - (int) pixel.dist * 4;
-					int blue = g.getColor().getBlue() - (int) pixel.dist * 4;
+					int red = g.getColor().getRed() - (int) pixel.dist;
+					int green = g.getColor().getGreen() - (int) pixel.dist;
+					int blue = g.getColor().getBlue() - (int) pixel.dist;
 					if (red > 255)
 						red = 255;
 					if (red < 0)

@@ -25,7 +25,7 @@ public class Player {
 	double y;
 	private double resolution = 1000;
 	private int focalLength = 250;
-	public static final int WALL_HEIGHT = 50;
+	public static final int WALL_HEIGHT = 200;
 	BufferedImage img = new Image("img/wall.png").img;
 
 	public Player(double xpos, double ypos, double ang, Component myComp) {
@@ -274,8 +274,8 @@ public class Player {
 						// TODO the distance
 
 						pixel.dist = getDistToRect(line, pixel);
-						pixel.z = -pixel.dist /2;
-						//pixel.z =(pixel.dist * Math.cos(addAngle));
+						pixel.z = -pixel.dist / 2;
+						// pixel.z =(pixel.dist * -Math.cos(addAngle));
 						// pixel.dist = pixel.dist *
 						// Math.cos(Math.toRadians(tempangle));
 						// System.out.println(pixel.dist);
@@ -391,7 +391,7 @@ public class Player {
 					if (blue < 0)
 						blue = 0;
 					g3.setColor(new Color(red, green, blue));
-					 g3.translate(0, 100);
+					g3.translate(0, 100);
 					System.out.println(pixel.z);
 					pixel.z = Math.abs(pixel.z);
 
@@ -399,13 +399,13 @@ public class Player {
 						// TODO draws the collumns of the pixels
 						// g3.translate(0, -((WALL_HEIGHT / ((int) pixel.dist /
 						// 5)) / 2));
-						
+
 						g3.translate(0, 300);
-						//int level = 100;
-						//System.out.println(level);
-						g3.translate(0, -((WALL_HEIGHT * WALL_HEIGHT/pixel.z)));
+						// int level = 100;
+						// System.out.println(level);
+						g3.translate(0, -((WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
 						g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
-								(int)((WALL_HEIGHT * WALL_HEIGHT / pixel.z))/2, (int) (1000 / resolution),
+								(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),
 								(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
 
 						Point2D myPoint = getCollisionPointOnRect(line, pixel);
@@ -415,7 +415,7 @@ public class Player {
 						// (int)myPoint.getY()-1, 2, 2);
 						// g3.translate(200, 200);
 						g3.setColor(Color.green);
-						//g3.draw(sideLine4);
+						// g3.draw(sideLine4);
 					} catch (Exception e) {
 
 					}
@@ -423,7 +423,10 @@ public class Player {
 					// g3.fillRect((int) ((double) 1000 / (double) resolution) *
 					// i, 50 + (int) pixel.dist, (1000/resolution),350 - (int)
 					// pixel.dist);
-
+					Point2D point = getCollisionPointOnRect(line, pixel);//TODO
+					g3.setColor(Color.red);
+					if(point!= null)
+					g3.fillOval((int)point.getX()-1, (int)point.getY()-1, 2, 2);
 					break;
 				}
 			}

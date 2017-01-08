@@ -59,7 +59,7 @@ public class Frame extends JFrame {
 		// theComponent.addMouseWheelListener(theComponent);
 		theComponent.setFocusable(true);
 
-		frame.getContentPane().setBackground(Color.cyan);
+		frame.getContentPane().setBackground(new Color(0,0,30));
 		theComponent.setDoubleBuffered(true);
 		theComponent.setVisible(true);
 

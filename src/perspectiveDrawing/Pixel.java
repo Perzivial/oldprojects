@@ -10,6 +10,7 @@ public class Pixel implements Comparable{
 	Color color;
 	Rectangle2D rect;
 	double dist = 0;
+	double z = 0;
 	public Pixel(double xpos, double ypos,Color clr) {
 		x = xpos;
 		y = ypos;

@@ -1,10 +1,17 @@
 package perspectiveDrawing;
 
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +23,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.JComponent;
 
-public class Component extends JComponent implements KeyListener {
+public class Component extends JComponent implements KeyListener{
 
 	Player player = new Player(0, 5, 90, this);
 	ArrayList<Pixel> pixels = new ArrayList<Pixel>();
@@ -24,7 +31,8 @@ public class Component extends JComponent implements KeyListener {
 	BufferedImage ground = new Image("img/ground.png").img;
 	int offsetX = 0;
 	int offsetY = 400;
-
+	Point2D mousePoint = null;
+	double sensitivity = 2;
 	public Component() {
 		// pixels.add(new Pixel(20, 5, Color.ORANGE));
 		// pixels.add(new Pixel(20, 20, Color.green));
@@ -34,13 +42,18 @@ public class Component extends JComponent implements KeyListener {
 	@Override
 	public void paintComponent(Graphics g) {
 
-		// g.setColor(Color.green.darker().darker());
-		// g.fillRect(0, 400, 1000, 200);
+		 g.setColor(Color.darkGray.darker().darker().darker());
+		 g.fillRect(0, 400, 1000, 200);
 		drawGround(g);
 		for (int i = 0; i < 200; i++) {
 			Color clr = new Color(0, 20, 0, (255 / 200) * i);
 			g.setColor(clr);
 			g.fillRect(0, 599 - i, 1000, 1);
+		}
+		for (int i = 0; i < 200; i++) {
+			Color clr = new Color(0, 50, 80, i);
+			g.setColor(clr);
+			g.fillRect(0, 200 + i, 1000, 1);
 		}
 		player.draw(g);
 		movePlayer();
@@ -159,8 +172,11 @@ public class Component extends JComponent implements KeyListener {
 				String token = tokenizer.nextToken();
 				
 				if (token.contains("1")) {
-					pixels.add(new Pixel(count * 10, countLine * 10, Color.gray));
+					pixels.add(new Pixel(count * 10, countLine * 10, Color.darkGray));
 					//System.out.println(count);
+				}
+				else if (token.contains("2")) {
+					pixels.add(new Pixel(count * 10, countLine * 10, Color.gray));
 				}
 				else if(token.contains("p")){
 					player.x = (count * 10) + 5;
@@ -174,4 +190,6 @@ public class Component extends JComponent implements KeyListener {
 			countLine++;
 		}
 	}
+
+
 }

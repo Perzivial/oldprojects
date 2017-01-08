@@ -23,9 +23,9 @@ public class Player {
 	double angle = 0;
 	double x;
 	double y;
-	private double resolution = 1000;
+	private double resolution = 200;
 	private int focalLength = 250;
-	public static final int WALL_HEIGHT = 100;
+	public static final int WALL_HEIGHT = 80;
 	BufferedImage img = new Image("img/wall.png").img;
 
 	public Player(double xpos, double ypos, double ang, Component myComp) {
@@ -43,12 +43,11 @@ public class Player {
 		g.setColor(Color.red);
 		g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (5 * Math.sin(Math.toRadians(angle))),
 				((int) y + 2) + (int) (5 * Math.cos(Math.toRadians(angle))));
-
 	}
 
 	public void goForward() {
-		x += 1 * Math.sin(Math.toRadians(angle));
-		y += 1 * Math.cos(Math.toRadians(angle));
+		x += 2 * Math.sin(Math.toRadians(angle));
+		y += 2 * Math.cos(Math.toRadians(angle));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
 				goBackward();
@@ -56,8 +55,8 @@ public class Player {
 	}
 
 	public void goBackward() {
-		x -= 1 * Math.sin(Math.toRadians(angle));
-		y -= 1 * Math.cos(Math.toRadians(angle));
+		x -= 2 * Math.sin(Math.toRadians(angle));
+		y -= 2 * Math.cos(Math.toRadians(angle));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
 				goForward();
@@ -65,11 +64,11 @@ public class Player {
 	}
 
 	public void rotateLeft() {
-		angle -= 5;
+		angle -= 7;
 	}
 
 	public void rotateRight() {
-		angle += 5;
+		angle += 7;
 	}
 
 	public void walkLeft() {
@@ -281,9 +280,9 @@ public class Player {
 						// System.out.println(pixel.dist);
 						// System.out.println(pixel.dist);
 						// g2.translate(200, 200);
-						g2.draw(new Line2D.Double(line.getP1(),
-								new Point2D.Double(line.getX1() + (pixel.dist * Math.sin(Math.toRadians(tempangle))),
-										line.getX1() + (pixel.dist * Math.cos(Math.toRadians(tempangle))))));
+//						g2.draw(new Line2D.Double(line.getP1(),
+//								new Point2D.Double(line.getX1() + (pixel.dist * Math.sin(Math.toRadians(tempangle))),
+//										line.getX1() + (pixel.dist * Math.cos(Math.toRadians(tempangle))))));
 
 						Line2D sideLine1 = new Line2D.Double(pixel.x, pixel.y, pixel.x + 10, pixel.y);
 						Point2D point = lineIntersect(line, sideLine1);
@@ -392,7 +391,7 @@ public class Player {
 						blue = 0;
 					g3.setColor(new Color(red, green, blue));
 					g3.translate(0, 100);
-					System.out.println(pixel.z);
+				//	System.out.println(pixel.z);
 					pixel.z = Math.abs(pixel.z);
 
 					try {

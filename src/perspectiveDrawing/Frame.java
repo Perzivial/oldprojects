@@ -2,10 +2,12 @@ package perspectiveDrawing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -13,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 
 import javax.swing.JButton;
@@ -54,21 +57,31 @@ public class Frame extends JFrame {
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		theComponent.addKeyListener(theComponent);
-		// theComponent.addMouseListener(theComponent);
-		// theComponent.addMouseMotionListener(theComponent);
+//		theComponent.addMouseListener(theComponent);
+//		theComponent.addMouseMotionListener(theComponent);
 		// theComponent.addMouseWheelListener(theComponent);
 		theComponent.setFocusable(true);
 
 		frame.getContentPane().setBackground(new Color(0,0,30));
 		theComponent.setDoubleBuffered(true);
 		theComponent.setVisible(true);
-
+		
 		frame.setVisible(true);
 		Font myFont = new Font("Lucida", Font.PLAIN, 25);
 		theComponent.setFont(myFont);
 
 		setLayout(new FlowLayout()); // set the layout manager
+		
+		// Transparent 16 x 16 pixel cursor image.
+		BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 
+		// Create a new blank cursor.
+		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+		    cursorImg, new Point(0, 0), "blank cursor");
+
+		// Set the blank cursor to the JFrame.
+		frame.getContentPane().setCursor(blankCursor);
+		
 		timer = new Timer(ONE_SECOND / 30, new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {

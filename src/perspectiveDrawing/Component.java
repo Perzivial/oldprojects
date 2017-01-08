@@ -159,7 +159,7 @@ public class Component extends JComponent implements KeyListener {
 				String token = tokenizer.nextToken();
 				
 				if (token.contains("1")) {
-					pixels.add(new Pixel(count * 10, countLine * 10, Color.red));
+					pixels.add(new Pixel(count * 10, countLine * 10, Color.gray));
 					//System.out.println(count);
 				}
 				count++;

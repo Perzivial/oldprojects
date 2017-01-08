@@ -23,8 +23,8 @@ public class Player {
 	double angle = 0;
 	double x;
 	double y;
-	private double resolution = 500;
-	private int focalLength = 500;
+	private double resolution = 1000;
+	private int focalLength = 250;
 	public static final int WALL_HEIGHT = 50;
 	BufferedImage img = new Image("img/wall.png").img;
 
@@ -254,8 +254,9 @@ public class Player {
 			tempangle += addAngle;
 			// tempangle += (resolution/135)*i;
 
-			Line2D line = new Line2D.Double(x + 2.5 /*+ (5 * Math.sin(Math.toRadians(angle)))*/,
-					y + 2.5 /*+ (5 * Math.cos(Math.toRadians(angle)))*/,
+			Line2D line = new Line2D.Double(
+					x + 2.5 /* + (5 * Math.sin(Math.toRadians(angle))) */,
+					y + 2.5 /* + (5 * Math.cos(Math.toRadians(angle))) */,
 					x + 2.5 + (focalLength * Math.sin(Math.toRadians(tempangle))),
 					y + 2.5 + (focalLength * Math.cos(Math.toRadians(tempangle))));
 			Graphics2D g2 = (Graphics2D) g.create();
@@ -273,7 +274,8 @@ public class Player {
 						// TODO the distance
 
 						pixel.dist = getDistToRect(line, pixel);
-						pixel.z = pixel.dist * Math.cos(Math.toRadians(tempangle));
+						pixel.z = -pixel.dist /2;
+						//pixel.z =(pixel.dist * Math.cos(addAngle));
 						// pixel.dist = pixel.dist *
 						// Math.cos(Math.toRadians(tempangle));
 						// System.out.println(pixel.dist);
@@ -282,7 +284,7 @@ public class Player {
 						g2.draw(new Line2D.Double(line.getP1(),
 								new Point2D.Double(line.getX1() + (pixel.dist * Math.sin(Math.toRadians(tempangle))),
 										line.getX1() + (pixel.dist * Math.cos(Math.toRadians(tempangle))))));
-						
+
 						Line2D sideLine1 = new Line2D.Double(pixel.x, pixel.y, pixel.x + 10, pixel.y);
 						Point2D point = lineIntersect(line, sideLine1);
 
@@ -371,7 +373,7 @@ public class Player {
 							g.setColor(pixel.color.darker());
 					} else
 						g.setColor(pixel.color);
-					
+
 					// g3.setColor(pixel.color);
 					int red = g.getColor().getRed() - (int) pixel.dist * 4;
 					int green = g.getColor().getGreen() - (int) pixel.dist * 4;
@@ -388,18 +390,23 @@ public class Player {
 						blue = 255;
 					if (blue < 0)
 						blue = 0;
-					//g3.setColor(new Color(red, green, blue));
-					//g3.translate(0, 350);
-					g3.translate(0, pixel.z);
+					g3.setColor(new Color(red, green, blue));
+					 g3.translate(0, 100);
 					System.out.println(pixel.z);
 					pixel.z = Math.abs(pixel.z);
-					
+
 					try {
 						// TODO draws the collumns of the pixels
-						//g3.translate(0, -((WALL_HEIGHT / ((int) pixel.dist / 5)) / 2));
+						// g3.translate(0, -((WALL_HEIGHT / ((int) pixel.dist /
+						// 5)) / 2));
+						
+						g3.translate(0, 300);
+						//int level = 100;
+						//System.out.println(level);
 						g3.translate(0, -((WALL_HEIGHT * WALL_HEIGHT/pixel.z)));
-						g3.fillRect((int) ((double) 1000 / (double) resolution) * i, (int)(WALL_HEIGHT * WALL_HEIGHT/pixel.z),
-								(int) (1000 / resolution), (int)(WALL_HEIGHT * WALL_HEIGHT/pixel.z));
+						g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
+								(int)((WALL_HEIGHT * WALL_HEIGHT / pixel.z))/2, (int) (1000 / resolution),
+								(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
 
 						Point2D myPoint = getCollisionPointOnRect(line, pixel);
 
@@ -408,7 +415,7 @@ public class Player {
 						// (int)myPoint.getY()-1, 2, 2);
 						// g3.translate(200, 200);
 						g3.setColor(Color.green);
-						g3.draw(sideLine4);
+						//g3.draw(sideLine4);
 					} catch (Exception e) {
 
 					}

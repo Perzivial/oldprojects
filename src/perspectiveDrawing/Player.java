@@ -13,6 +13,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.ArrayList;
@@ -28,9 +29,12 @@ public class Player {
 	private int focalLength = 500;
 	public static final int WALL_HEIGHT = 80;
 	public static BufferedImage img = new Image("img/wall.png").img;
-
+	
 	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
 	boolean queueShot = false;
+	int damage = 25;
+	int shotCoolDown = 15;
+	int coolDown = 0;
 
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
@@ -40,10 +44,10 @@ public class Player {
 	}
 
 	public void draw(Graphics g) {
-		drawRays(g);
+
 		Graphics2D g2 = (Graphics2D) g;
-		for(Pixel pixel:comp.pixels){
-			if(pixel instanceof Enemy){
+		for (Pixel pixel : comp.pixels) {
+			if (pixel instanceof Enemy) {
 				((Enemy) pixel).drawColumns(g2);
 			}
 		}
@@ -53,24 +57,56 @@ public class Player {
 		g.setColor(Color.white);
 		g.fillRect((int) x, (int) y, 5, 5);
 		g.setColor(Color.red);
-		g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (5 * Math.sin(Math.toRadians(angle))),
-				((int) y + 2) + (int) (5 * Math.cos(Math.toRadians(angle))));
+		g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (50 * Math.sin(Math.toRadians(angle))),
+				((int) y + 2) + (int) (50 * Math.cos(Math.toRadians(angle))));
 		drawWeapon(g);
 		g.setColor(Color.red);
 		for (Pixel pixel : comp.pixels) {
 			if (pixel instanceof Enemy)
 				((Enemy) pixel).move();
 		}
-
+		if (coolDown > 0)
+			coolDown--;
 	}
 
 	public void drawWeapon(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
-		g2.drawImage(shotgun, 400, 400, 200, 200, null);
+		if(coolDown == shotCoolDown-1){
+			g2.setColor(Color.white);
+			g2.fillOval(410, 350, 150, 150);
+		}
+		g2.drawImage(shotgun, 400-coolDown*2, 400+coolDown, 200+coolDown, 200, null);
 	}
 
 	public void shoot() {
+		ArrayList<Pixel> toRemove = new ArrayList<Pixel>();
+		if (coolDown <= 0) {
+			Sound shot = new Sound("sound/gunshot.wav");
+			shot.play();
+			for (Pixel pixel : comp.pixels) {
 
+				if (pixel instanceof Enemy) {
+					RoundRectangle2D rectmy = new RoundRectangle2D.Double(460, 300, 70, 200, 100, 200);
+					boolean hasHit = false;
+					for (Rectangle rect2 : ((Enemy) pixel).columns) {
+						if (rectmy.intersects(rect2)) {
+							if (!hasHit) {
+								((Enemy) pixel).health -= damage;
+								((Enemy) pixel).hitTimer = 5;
+								if (((Enemy) pixel).health <= 0)
+									toRemove.add(pixel);
+								hasHit = true;
+							}
+						}
+					}
+				}
+
+			}
+
+			comp.pixels.removeAll(toRemove);
+
+			coolDown = shotCoolDown;
+		}
 	}
 
 	public void goForward() {
@@ -78,6 +114,7 @@ public class Player {
 		y += 2 * Math.cos(Math.toRadians(angle));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
+				if(!(pixel instanceof Enemy))
 				goBackward();
 		}
 	}
@@ -87,6 +124,7 @@ public class Player {
 		y -= 2 * Math.cos(Math.toRadians(angle));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
+				if(!(pixel instanceof Enemy))
 				goForward();
 		}
 	}
@@ -104,6 +142,7 @@ public class Player {
 		y += 1 * Math.cos(Math.toRadians(angle - 90));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
+				if(!(pixel instanceof Enemy))
 				walkRight();
 		}
 	}
@@ -113,6 +152,7 @@ public class Player {
 		y += 1 * Math.cos(Math.toRadians(angle + 90));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
+				if(!(pixel instanceof Enemy))
 				walkLeft();
 		}
 	}
@@ -233,7 +273,11 @@ public class Player {
 		if (point4 != null)
 			dists.add(line.getP1().distance(point4));
 		Collections.sort(dists);
-		return dists.get(0);
+		try {
+			return dists.get(0);
+		} catch (Exception e) {
+			return focalLength;
+		}
 	}
 
 	public Point2D getCollisionPointOnRect(Line2D line, Pixel pixel) {
@@ -289,7 +333,7 @@ public class Player {
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.translate(1000, 0);
 			g2.scale(-1, 1);
-			g2.draw(line);
+			// g2.draw(line);
 
 			for (Pixel pixel : comp.pixels) {
 				if (line.intersects(pixel.rect)) {
@@ -442,18 +486,16 @@ public class Player {
 						// int level = 100;
 						// System.out.println(level);
 						g3.translate(0, -((WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
-						if(!(pixel instanceof Enemy)){
-						g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
-								(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),
-								(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
-						}
-						else{
-							((Enemy)pixel).amountHit ++;
-						((Enemy)pixel).columns.add(new Rectangle((int) ((double) 1000 / (double)
-						 resolution) * i,
-								(int)(400 + -((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) + ((int) ((WALL_HEIGHT * WALL_HEIGHT /
-						 pixel.z)) / 2)), (int) (1000 / resolution),(int)
-						 (WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
+						if (!(pixel instanceof Enemy)) {
+							g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
+									(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),
+									(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
+						} else {
+							((Enemy) pixel).amountHit++;
+							((Enemy) pixel).columns.add(new Rectangle((int) ((double) 1000 / (double) resolution) * i,
+									(int) (400 + -((WALL_HEIGHT * WALL_HEIGHT / pixel.z))
+											+ ((int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2)),
+									(int) (1000 / resolution), (int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
 						}
 						Point2D myPoint = getCollisionPointOnRect(line, pixel);
 
@@ -470,19 +512,16 @@ public class Player {
 					// g3.fillRect((int) ((double) 1000 / (double) resolution) *
 					// i, 50 + (int) pixel.dist, (1000/resolution),350 - (int)
 					// pixel.dist);
-					Point2D point = getCollisionPointOnRect(line, pixel);// TODO
-					g3.setColor(Color.red);
-					if (point != null)
-						g3.fillOval((int) point.getX() - 1, (int) point.getY() - 1, 2, 2);
-					if(!(pixel instanceof Enemy))
-					break;
+
+					if (!(pixel instanceof Enemy))
+						break;
 				}
 
 			}
 
 		}
 	}
-	
+
 	public BufferedImage drawSlicedImage(Line2D sideLine, Line2D ray, BufferedImage image, Graphics2D g) {
 		int percent = (int) ((lineIntersect(sideLine, ray).distance(sideLine.getP1())
 				/ sideLine.getP1().distance(sideLine.getP2())) * 100);

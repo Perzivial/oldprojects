@@ -13,6 +13,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,7 +36,6 @@ public class Component extends JComponent implements KeyListener {
 	Point2D mousePoint = null;
 	double sensitivity = 2;
 
-
 	public Component() {
 		// pixels.add(new Pixel(20, 5, Color.ORANGE));
 		// pixels.add(new Pixel(20, 20, Color.green));
@@ -45,6 +45,8 @@ public class Component extends JComponent implements KeyListener {
 	@Override
 	public void paintComponent(Graphics g) {
 
+		Graphics2D g20 = (Graphics2D) g.create();
+		// g20.fill(new RoundRectangle2D.Double(460,300,70,200,100,200));
 		g.setColor(Color.darkGray.darker().darker().darker());
 		g.fillRect(0, 400, 1000, 200);
 		drawGround(g);
@@ -58,15 +60,24 @@ public class Component extends JComponent implements KeyListener {
 			g.setColor(clr);
 			g.fillRect(0, 200 + i, 1000, 1);
 		}
+		player.drawRays(g);
+		if (isKeyDown(KeyEvent.VK_SPACE)) {
+			player.shoot();
+		}
 		player.draw(g);
 		movePlayer();
 		drawPixels(g);
-		//g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
+		// g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
+
+			
 	}
-	public BufferedImage getSlice(BufferedImage image, int slice, int amountSlices){
-		
-		return image.getSubimage((image.getWidth()/amountSlices) * slice, 0, (image.getWidth()/amountSlices), image.getHeight());
+
+	public BufferedImage getSlice(BufferedImage image, int slice, int amountSlices) {
+
+		return image.getSubimage((image.getWidth() / amountSlices) * slice, 0, (image.getWidth() / amountSlices),
+				image.getHeight());
 	}
+
 	public void drawGround(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
 
@@ -92,7 +103,6 @@ public class Component extends JComponent implements KeyListener {
 
 	}
 
-	
 	public void movePlayer() {
 		if (isKeyDown(KeyEvent.VK_W)) {
 			player.goForward();
@@ -110,11 +120,9 @@ public class Component extends JComponent implements KeyListener {
 			player.rotateLeft();
 		if (isKeyDown(KeyEvent.VK_RIGHT))
 			player.rotateRight();
-		if (isKeyDown(KeyEvent.VK_SPACE)) {
-			player.shoot();
-		}
+
 	}
-	
+
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
@@ -190,8 +198,8 @@ public class Component extends JComponent implements KeyListener {
 				} else if (token.contains("p")) {
 					player.x = (count * 10) + 5;
 					player.y = (countLine * 10) + 5;
-				}else if (token.contains("e")) {
-					pixels.add(new Enemy(count * 10, countLine * 10, Color.red,this));
+				} else if (token.contains("e")) {
+					pixels.add(new Enemy(count * 10, countLine * 10, Color.red, this));
 				}
 				count++;
 

@@ -98,7 +98,7 @@ public class Image {
 			}
 			BufferedImage tmp = new BufferedImage(w, h, type);
 			Graphics2D g2 = tmp.createGraphics();
-			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 			g2.drawImage(ret, 0, 0, w, h, null);
 			g2.dispose();
 			ret = tmp;

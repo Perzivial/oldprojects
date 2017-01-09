@@ -86,9 +86,9 @@ public class Component extends JComponent implements KeyListener{
 	}
 
 	public void movePlayer() {
-		if (isKeyDown(KeyEvent.VK_W)) {
+		if (isKeyDown(KeyEvent.VK_UP)) {
 			player.goForward();
-		} else if (isKeyDown(KeyEvent.VK_S))
+		} else if (isKeyDown(KeyEvent.VK_DOWN))
 			player.goBackward();
 		if (isKeyDown(KeyEvent.VK_A)) {
 			player.walkLeft();

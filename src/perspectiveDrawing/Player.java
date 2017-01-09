@@ -27,7 +27,7 @@ public class Player {
 	private int focalLength = 250;
 	public static final int WALL_HEIGHT = 80;
 	BufferedImage img = new Image("img/wall.png").img;
-
+	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;
@@ -43,8 +43,14 @@ public class Player {
 		g.setColor(Color.red);
 		g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (5 * Math.sin(Math.toRadians(angle))),
 				((int) y + 2) + (int) (5 * Math.cos(Math.toRadians(angle))));
+		drawWeapon(g);
 	}
-
+	
+	public void drawWeapon(Graphics g){
+		Graphics2D g2 = (Graphics2D) g.create();
+		g2.drawImage(shotgun, 400, 400,200,200,null); 
+	}
+	
 	public void goForward() {
 		x += 2 * Math.sin(Math.toRadians(angle));
 		y += 2 * Math.cos(Math.toRadians(angle));

@@ -28,6 +28,7 @@ public class Player {
 	public static final int WALL_HEIGHT = 80;
 	BufferedImage img = new Image("img/wall.png").img;
 	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
+	boolean queueShot = false;
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;
@@ -44,11 +45,18 @@ public class Player {
 		g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (5 * Math.sin(Math.toRadians(angle))),
 				((int) y + 2) + (int) (5 * Math.cos(Math.toRadians(angle))));
 		drawWeapon(g);
+		g.setColor(Color.red);
+		
 	}
 	
 	public void drawWeapon(Graphics g){
 		Graphics2D g2 = (Graphics2D) g.create();
 		g2.drawImage(shotgun, 400, 400,200,200,null); 
+	}
+		
+	public void shoot(){
+		queueShot = true;
+	
 	}
 	
 	public void goForward() {
@@ -265,7 +273,7 @@ public class Player {
 					x + 2.5 + (focalLength * Math.sin(Math.toRadians(tempangle))),
 					y + 2.5 + (focalLength * Math.cos(Math.toRadians(tempangle))));
 			Graphics2D g2 = (Graphics2D) g.create();
-			// g2.draw(line);
+			 g2.draw(line);
 
 			for (Pixel pixel : comp.pixels) {
 				if (line.intersects(pixel.rect)) {
@@ -322,6 +330,8 @@ public class Player {
 			Collections.sort(comp.pixels);
 			// Collections.reverse(comp.pixels);
 			for (Pixel pixel : comp.pixels) {
+				if(pixel instanceof Enemy)
+					((Enemy) pixel).move();
 				if (line.intersects(pixel.rect)) {
 					Graphics2D g3 = (Graphics2D) g.create();
 					Line2D sideLine1 = new Line2D.Double(pixel.x, pixel.y, pixel.x + 10, pixel.y);
@@ -409,10 +419,11 @@ public class Player {
 						// int level = 100;
 						// System.out.println(level);
 						g3.translate(0, -((WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
-						g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
-								(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),
-								(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
-
+					g3.fillRect((int) ((double) 1000 / (double) resolution) * i,(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
+						//g3.drawImage(comp.getSlice(img, i, (int)resolution),(int) ((double) 1000 / (double) resolution) * i,(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z),null);
+						
+						
+						
 						Point2D myPoint = getCollisionPointOnRect(line, pixel);
 
 						g3.setColor(Color.red);
@@ -432,13 +443,21 @@ public class Player {
 					g3.setColor(Color.red);
 					if(point!= null)
 					g3.fillOval((int)point.getX()-1, (int)point.getY()-1, 2, 2);
+					
+				
+					
 					break;
 				}
+
+				
+			
 			}
 
 		}
 	}
-
+	
+	
+	
 	public Point2D lineIntersectPoint(Line2D line1, Line2D line2) {
 		double x1 = line1.getX1();
 		double x2 = line1.getX2();

@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,7 +24,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.JComponent;
 
-public class Component extends JComponent implements KeyListener{
+public class Component extends JComponent implements KeyListener {
 
 	Player player = new Player(0, 5, 90, this);
 	ArrayList<Pixel> pixels = new ArrayList<Pixel>();
@@ -33,6 +34,8 @@ public class Component extends JComponent implements KeyListener{
 	int offsetY = 400;
 	Point2D mousePoint = null;
 	double sensitivity = 2;
+
+
 	public Component() {
 		// pixels.add(new Pixel(20, 5, Color.ORANGE));
 		// pixels.add(new Pixel(20, 20, Color.green));
@@ -42,8 +45,8 @@ public class Component extends JComponent implements KeyListener{
 	@Override
 	public void paintComponent(Graphics g) {
 
-		 g.setColor(Color.darkGray.darker().darker().darker());
-		 g.fillRect(0, 400, 1000, 200);
+		g.setColor(Color.darkGray.darker().darker().darker());
+		g.fillRect(0, 400, 1000, 200);
 		drawGround(g);
 		for (int i = 0; i < 200; i++) {
 			Color clr = new Color(0, 20, 0, (255 / 200) * i);
@@ -58,8 +61,12 @@ public class Component extends JComponent implements KeyListener{
 		player.draw(g);
 		movePlayer();
 		drawPixels(g);
+		//g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
 	}
-
+	public BufferedImage getSlice(BufferedImage image, int slice, int amountSlices){
+		
+		return image.getSubimage((image.getWidth()/amountSlices) * slice, 0, (image.getWidth()/amountSlices), image.getHeight());
+	}
 	public void drawGround(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
 
@@ -85,10 +92,11 @@ public class Component extends JComponent implements KeyListener{
 
 	}
 
+	
 	public void movePlayer() {
-		if (isKeyDown(KeyEvent.VK_UP)) {
+		if (isKeyDown(KeyEvent.VK_W)) {
 			player.goForward();
-		} else if (isKeyDown(KeyEvent.VK_DOWN))
+		} else if (isKeyDown(KeyEvent.VK_S))
 			player.goBackward();
 		if (isKeyDown(KeyEvent.VK_A)) {
 			player.walkLeft();
@@ -102,8 +110,11 @@ public class Component extends JComponent implements KeyListener{
 			player.rotateLeft();
 		if (isKeyDown(KeyEvent.VK_RIGHT))
 			player.rotateRight();
+		if (isKeyDown(KeyEvent.VK_SPACE)) {
+			player.shoot();
+		}
 	}
-
+	
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
@@ -162,34 +173,33 @@ public class Component extends JComponent implements KeyListener{
 			lines.add(scan.nextLine());
 		}
 		int countLine = 0;
-		
+
 		for (String str : lines) {
 			StringTokenizer tokenizer = new StringTokenizer(str);
 
 			int count = 0;
 			while (tokenizer.hasMoreTokens()) {
-				
+
 				String token = tokenizer.nextToken();
-				
+
 				if (token.contains("1")) {
 					pixels.add(new Pixel(count * 10, countLine * 10, Color.darkGray));
-					//System.out.println(count);
-				}
-				else if (token.contains("2")) {
+					// System.out.println(count);
+				} else if (token.contains("2")) {
 					pixels.add(new Pixel(count * 10, countLine * 10, Color.gray));
-				}
-				else if(token.contains("p")){
+				} else if (token.contains("p")) {
 					player.x = (count * 10) + 5;
-					player.y =( countLine * 10) + 5;
+					player.y = (countLine * 10) + 5;
+				}else if (token.contains("e")) {
+					pixels.add(new Enemy(count * 10, countLine * 10, Color.red,this));
 				}
 				count++;
 				System.out.println("1");
 			}
 			System.out.println("2");
-			
+
 			countLine++;
 		}
 	}
-
 
 }

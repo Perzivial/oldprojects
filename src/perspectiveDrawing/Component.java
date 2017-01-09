@@ -194,9 +194,8 @@ public class Component extends JComponent implements KeyListener {
 					pixels.add(new Enemy(count * 10, countLine * 10, Color.red,this));
 				}
 				count++;
-				System.out.println("1");
+
 			}
-			System.out.println("2");
 
 			countLine++;
 		}

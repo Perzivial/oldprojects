@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -24,11 +25,13 @@ public class Player {
 	double x;
 	double y;
 	private double resolution = 200;
-	private int focalLength = 250;
+	private int focalLength = 500;
 	public static final int WALL_HEIGHT = 80;
-	BufferedImage img = new Image("img/wall.png").img;
+	public static BufferedImage img = new Image("img/wall.png").img;
+
 	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
 	boolean queueShot = false;
+
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;
@@ -39,6 +42,14 @@ public class Player {
 	public void draw(Graphics g) {
 		drawRays(g);
 		Graphics2D g2 = (Graphics2D) g;
+		for(Pixel pixel:comp.pixels){
+			if(pixel instanceof Enemy){
+				((Enemy) pixel).drawColumns(g2);
+			}
+		}
+		g2.translate(1000, 0);
+		g2.scale(-1, 1);
+
 		g.setColor(Color.white);
 		g.fillRect((int) x, (int) y, 5, 5);
 		g.setColor(Color.red);
@@ -46,19 +57,22 @@ public class Player {
 				((int) y + 2) + (int) (5 * Math.cos(Math.toRadians(angle))));
 		drawWeapon(g);
 		g.setColor(Color.red);
-		
+		for (Pixel pixel : comp.pixels) {
+			if (pixel instanceof Enemy)
+				((Enemy) pixel).move();
+		}
+
 	}
-	
-	public void drawWeapon(Graphics g){
+
+	public void drawWeapon(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
-		g2.drawImage(shotgun, 400, 400,200,200,null); 
+		g2.drawImage(shotgun, 400, 400, 200, 200, null);
 	}
-		
-	public void shoot(){
-		queueShot = true;
-	
+
+	public void shoot() {
+
 	}
-	
+
 	public void goForward() {
 		x += 2 * Math.sin(Math.toRadians(angle));
 		y += 2 * Math.cos(Math.toRadians(angle));
@@ -273,7 +287,9 @@ public class Player {
 					x + 2.5 + (focalLength * Math.sin(Math.toRadians(tempangle))),
 					y + 2.5 + (focalLength * Math.cos(Math.toRadians(tempangle))));
 			Graphics2D g2 = (Graphics2D) g.create();
-			 g2.draw(line);
+			g2.translate(1000, 0);
+			g2.scale(-1, 1);
+			g2.draw(line);
 
 			for (Pixel pixel : comp.pixels) {
 				if (line.intersects(pixel.rect)) {
@@ -288,15 +304,21 @@ public class Player {
 
 						pixel.dist = getDistToRect(line, pixel);
 						pixel.z = -pixel.dist / 2;
+						if (pixel instanceof Enemy)
+							pixel.z = line.getP1().distance(new Point2D.Double(pixel.x + 5, pixel.y + 5));
+						// pixel.z = (-pixel.dist
+						// *Math.sin(Math.toRadians(90)))/Math.sin(Math.toRadians(tempangle));
 						// pixel.z =(pixel.dist * -Math.cos(addAngle));
 						// pixel.dist = pixel.dist *
 						// Math.cos(Math.toRadians(tempangle));
 						// System.out.println(pixel.dist);
 						// System.out.println(pixel.dist);
 						// g2.translate(200, 200);
-//						g2.draw(new Line2D.Double(line.getP1(),
-//								new Point2D.Double(line.getX1() + (pixel.dist * Math.sin(Math.toRadians(tempangle))),
-//										line.getX1() + (pixel.dist * Math.cos(Math.toRadians(tempangle))))));
+						// g2.draw(new Line2D.Double(line.getP1(),
+						// new Point2D.Double(line.getX1() + (pixel.dist *
+						// Math.sin(Math.toRadians(tempangle))),
+						// line.getX1() + (pixel.dist *
+						// Math.cos(Math.toRadians(tempangle))))));
 
 						Line2D sideLine1 = new Line2D.Double(pixel.x, pixel.y, pixel.x + 10, pixel.y);
 						Point2D point = lineIntersect(line, sideLine1);
@@ -330,8 +352,7 @@ public class Player {
 			Collections.sort(comp.pixels);
 			// Collections.reverse(comp.pixels);
 			for (Pixel pixel : comp.pixels) {
-				if(pixel instanceof Enemy)
-					((Enemy) pixel).move();
+
 				if (line.intersects(pixel.rect)) {
 					Graphics2D g3 = (Graphics2D) g.create();
 					Line2D sideLine1 = new Line2D.Double(pixel.x, pixel.y, pixel.x + 10, pixel.y);
@@ -357,38 +378,40 @@ public class Player {
 					// g3.setColor(Color.BLACK);
 
 					g.setColor(pixel.color);
+					// BufferedImage toDraw = img;
+					if (!(pixel instanceof Enemy)) {
+						if (line.intersectsLine(sideLine1) && line.intersectsLine(sideLine2)) {
+							g.setColor(pixel.color);
 
-					if (line.intersectsLine(sideLine1) && line.intersectsLine(sideLine2))
-						g.setColor(pixel.color);
-					else if (line.intersectsLine(sideLine3) && line.intersectsLine(sideLine4))
-						g.setColor(pixel.color.darker());
-					else if (line.intersectsLine(sideLine1) && line.intersectsLine(sideLine3)) {
-						if (lineIntersect(line, sideLine1).distance(line.getP1()) < lineIntersect(line, sideLine3)
-								.distance(line.getP1()))
-							g.setColor(pixel.color);
-						else
+						} else if (line.intersectsLine(sideLine3) && line.intersectsLine(sideLine4))
 							g.setColor(pixel.color.darker());
-					} else if (line.intersectsLine(sideLine1) && line.intersectsLine(sideLine4)) {
-						if (lineIntersect(line, sideLine1).distance(line.getP1()) < lineIntersect(line, sideLine4)
-								.distance(line.getP1()))
+						else if (line.intersectsLine(sideLine1) && line.intersectsLine(sideLine3)) {
+							if (lineIntersect(line, sideLine1).distance(line.getP1()) < lineIntersect(line, sideLine3)
+									.distance(line.getP1()))
+								g.setColor(pixel.color);
+							else
+								g.setColor(pixel.color.darker());
+						} else if (line.intersectsLine(sideLine1) && line.intersectsLine(sideLine4)) {
+							if (lineIntersect(line, sideLine1).distance(line.getP1()) < lineIntersect(line, sideLine4)
+									.distance(line.getP1()))
+								g.setColor(pixel.color);
+							else
+								g.setColor(pixel.color.darker());
+						} else if (line.intersectsLine(sideLine2) && line.intersectsLine(sideLine3)) {
+							if (lineIntersect(line, sideLine2).distance(line.getP1()) < lineIntersect(line, sideLine3)
+									.distance(line.getP1()))
+								g.setColor(pixel.color);
+							else
+								g.setColor(pixel.color.darker());
+						} else if (line.intersectsLine(sideLine2) && line.intersectsLine(sideLine4)) {
+							if (lineIntersect(line, sideLine2).distance(line.getP1()) < lineIntersect(line, sideLine4)
+									.distance(line.getP1()))
+								g.setColor(pixel.color);
+							else
+								g.setColor(pixel.color.darker());
+						} else
 							g.setColor(pixel.color);
-						else
-							g.setColor(pixel.color.darker());
-					} else if (line.intersectsLine(sideLine2) && line.intersectsLine(sideLine3)) {
-						if (lineIntersect(line, sideLine2).distance(line.getP1()) < lineIntersect(line, sideLine3)
-								.distance(line.getP1()))
-							g.setColor(pixel.color);
-						else
-							g.setColor(pixel.color.darker());
-					} else if (line.intersectsLine(sideLine2) && line.intersectsLine(sideLine4)) {
-						if (lineIntersect(line, sideLine2).distance(line.getP1()) < lineIntersect(line, sideLine4)
-								.distance(line.getP1()))
-							g.setColor(pixel.color);
-						else
-							g.setColor(pixel.color.darker());
-					} else
-						g.setColor(pixel.color);
-
+					}
 					// g3.setColor(pixel.color);
 					int red = g.getColor().getRed() - (int) pixel.dist;
 					int green = g.getColor().getGreen() - (int) pixel.dist;
@@ -407,7 +430,7 @@ public class Player {
 						blue = 0;
 					g3.setColor(new Color(red, green, blue));
 					g3.translate(0, 100);
-				//	System.out.println(pixel.z);
+					// System.out.println(pixel.z);
 					pixel.z = Math.abs(pixel.z);
 
 					try {
@@ -419,11 +442,19 @@ public class Player {
 						// int level = 100;
 						// System.out.println(level);
 						g3.translate(0, -((WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
-					g3.fillRect((int) ((double) 1000 / (double) resolution) * i,(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
-						//g3.drawImage(comp.getSlice(img, i, (int)resolution),(int) ((double) 1000 / (double) resolution) * i,(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z),null);
-						
-						
-						
+						if(!(pixel instanceof Enemy)){
+						g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
+								(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),
+								(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
+						}
+						else{
+							((Enemy)pixel).amountHit ++;
+						((Enemy)pixel).columns.add(new Rectangle((int) ((double) 1000 / (double)
+						 resolution) * i,
+								(int)(400 + -((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) + ((int) ((WALL_HEIGHT * WALL_HEIGHT /
+						 pixel.z)) / 2)), (int) (1000 / resolution),(int)
+						 (WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
+						}
 						Point2D myPoint = getCollisionPointOnRect(line, pixel);
 
 						g3.setColor(Color.red);
@@ -439,25 +470,25 @@ public class Player {
 					// g3.fillRect((int) ((double) 1000 / (double) resolution) *
 					// i, 50 + (int) pixel.dist, (1000/resolution),350 - (int)
 					// pixel.dist);
-					Point2D point = getCollisionPointOnRect(line, pixel);//TODO
+					Point2D point = getCollisionPointOnRect(line, pixel);// TODO
 					g3.setColor(Color.red);
-					if(point!= null)
-					g3.fillOval((int)point.getX()-1, (int)point.getY()-1, 2, 2);
-					
-				
-					
+					if (point != null)
+						g3.fillOval((int) point.getX() - 1, (int) point.getY() - 1, 2, 2);
+					if(!(pixel instanceof Enemy))
 					break;
 				}
 
-				
-			
 			}
 
 		}
 	}
 	
-	
-	
+	public BufferedImage drawSlicedImage(Line2D sideLine, Line2D ray, BufferedImage image, Graphics2D g) {
+		int percent = (int) ((lineIntersect(sideLine, ray).distance(sideLine.getP1())
+				/ sideLine.getP1().distance(sideLine.getP2())) * 100);
+		return comp.getSlice(image, (int) ((resolution / 100) * (percent)), (int) resolution);
+	}
+
 	public Point2D lineIntersectPoint(Line2D line1, Line2D line2) {
 		double x1 = line1.getX1();
 		double x2 = line1.getX2();

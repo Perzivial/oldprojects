@@ -71,7 +71,7 @@ public class Frame extends JFrame {
 		theComponent.setFont(myFont);
 
 		setLayout(new FlowLayout()); // set the layout manager
-		
+		/*
 		// Transparent 16 x 16 pixel cursor image.
 		BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 
@@ -81,19 +81,20 @@ public class Frame extends JFrame {
 
 		// Set the blank cursor to the JFrame.
 		frame.getContentPane().setCursor(blankCursor);
-		
+		*/
+		theComponent.frame = frame;
 		timer = new Timer(ONE_SECOND / 30, new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 
 				theComponent.repaint();
-
+				
 			}
 		});
 	}
 
 	public static void main(String[] args) throws Exception {
-		new Frame("Spare Management System");
+		new Frame("Spooky");
 		timer.start();
 
 	}

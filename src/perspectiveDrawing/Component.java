@@ -24,6 +24,7 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 public class Component extends JComponent implements KeyListener {
 
@@ -35,6 +36,10 @@ public class Component extends JComponent implements KeyListener {
 	int offsetY = 400;
 	Point2D mousePoint = null;
 	double sensitivity = 2;
+	int spawnTimer = 100;
+	int spawnFrequency = 200;
+	JFrame frame;
+	boolean shouldZoom = false;
 
 	public Component() {
 		// pixels.add(new Pixel(20, 5, Color.ORANGE));
@@ -45,6 +50,11 @@ public class Component extends JComponent implements KeyListener {
 	@Override
 	public void paintComponent(Graphics g) {
 
+		
+		Graphics2D zoom = (Graphics2D) g;
+		if (shouldZoom) {
+			zoom.scale(2, 2);
+		}
 		Graphics2D g20 = (Graphics2D) g.create();
 		// g20.fill(new RoundRectangle2D.Double(460,300,70,200,100,200));
 		g.setColor(Color.darkGray.darker().darker().darker());
@@ -53,7 +63,7 @@ public class Component extends JComponent implements KeyListener {
 		for (int i = 0; i < 200; i++) {
 			Color clr = new Color(0, 20, 0, (255 / 200) * i);
 			g.setColor(clr);
-			g.fillRect(0, 599 - i, 1000, 1);
+			// g.fillRect(0, 599 - i, 1000, 1);
 		}
 		for (int i = 0; i < 200; i++) {
 			Color clr = new Color(0, 50, 80, i);
@@ -66,10 +76,41 @@ public class Component extends JComponent implements KeyListener {
 		}
 		player.draw(g);
 		movePlayer();
-		drawPixels(g);
+		if (isKeyDown(KeyEvent.VK_Q))
+			drawPixels(g);
 		// g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
+		spawnGhost();
 
-			
+	}
+
+	public void spawnGhost() {
+		int amountGhosts = 0;
+		for (Pixel pixel : pixels) {
+			if (pixel instanceof Enemy)
+				amountGhosts++;
+		}
+		if (amountGhosts < 5) {
+			if (spawnTimer <= 0) {
+
+				Enemy temp = new Enemy(player.x + Helper.randInt(-50, 50), player.y + Helper.randInt(-50, 50),
+						Color.red, this);
+
+				pixels.add(temp);
+				spawnTimer = spawnFrequency;
+			} else {
+				spawnTimer--;
+			}
+		}
+	}
+
+	public boolean doesRectCollide(Rectangle2D rect) {
+		for (Pixel pixel : pixels) {
+			if (rect.intersects(pixel.rect)) {
+
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public BufferedImage getSlice(BufferedImage image, int slice, int amountSlices) {
@@ -131,6 +172,7 @@ public class Component extends JComponent implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+
 		keysPressed.add(e.getKeyCode());
 		// TODO Auto-generated method stub
 		/*

@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.FlatteningPathIterator;
@@ -26,7 +27,7 @@ public class Player {
 	double x;
 	double y;
 	private double resolution = 200;
-	private int focalLength = 500;
+	private int focalLength = 1000;
 	public static final int WALL_HEIGHT = 80;
 	public static BufferedImage img = new Image("img/wall.png").img;
 	
@@ -53,12 +54,13 @@ public class Player {
 		}
 		g2.translate(1000, 0);
 		g2.scale(-1, 1);
-
+		if(comp.isKeyDown(KeyEvent.VK_Q)){
 		g.setColor(Color.white);
 		g.fillRect((int) x, (int) y, 5, 5);
 		g.setColor(Color.red);
 		g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (50 * Math.sin(Math.toRadians(angle))),
 				((int) y + 2) + (int) (50 * Math.cos(Math.toRadians(angle))));
+		}
 		drawWeapon(g);
 		g.setColor(Color.red);
 		for (Pixel pixel : comp.pixels) {
@@ -71,7 +73,7 @@ public class Player {
 
 	public void drawWeapon(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
-		if(coolDown == shotCoolDown-1){
+		if(coolDown == shotCoolDown-2){
 			g2.setColor(Color.white);
 			g2.fillOval(410, 350, 150, 150);
 		}
@@ -93,8 +95,11 @@ public class Player {
 							if (!hasHit) {
 								((Enemy) pixel).health -= damage;
 								((Enemy) pixel).hitTimer = 5;
-								if (((Enemy) pixel).health <= 0)
+								((Enemy) pixel).playHurtSound();
+								if (((Enemy) pixel).health <= 0){
 									toRemove.add(pixel);
+									((Enemy) pixel).playDeadSound();
+								}
 								hasHit = true;
 							}
 						}
@@ -130,11 +135,11 @@ public class Player {
 	}
 
 	public void rotateLeft() {
-		angle -= 7;
+		angle -= 5;
 	}
 
 	public void rotateRight() {
-		angle += 7;
+		angle += 5;
 	}
 
 	public void walkLeft() {
@@ -393,7 +398,11 @@ public class Player {
 				}
 			}
 			// comp.sortPixelsByDistance();
+			try{
 			Collections.sort(comp.pixels);
+			}catch(Exception e){
+				System.out.println("an error occured while sorting the pixel array");
+			}
 			// Collections.reverse(comp.pixels);
 			for (Pixel pixel : comp.pixels) {
 

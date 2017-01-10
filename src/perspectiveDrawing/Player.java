@@ -30,7 +30,7 @@ public class Player {
 	private int focalLength = 1000;
 	public static final int WALL_HEIGHT = 80;
 	public static BufferedImage img = new Image("img/wall.png").img;
-	
+	int health = 100;
 	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
 	boolean queueShot = false;
 	int damage = 25;
@@ -45,7 +45,7 @@ public class Player {
 	}
 
 	public void draw(Graphics g) {
-
+		Graphics gSep = g.create();
 		Graphics2D g2 = (Graphics2D) g;
 		for (Pixel pixel : comp.pixels) {
 			if (pixel instanceof Enemy) {
@@ -69,8 +69,30 @@ public class Player {
 		}
 		if (coolDown > 0)
 			coolDown--;
+		damage();
+		drawHealthBar(gSep);
 	}
-
+		
+	public void drawHealthBar(Graphics g){
+		g.setColor(Color.green);
+		g.fillRect(20, 510, health * 2, 50);
+	}
+	
+	public void damage(){
+		boolean shouldApply = false;
+		for(Pixel pixel:comp.pixels){
+			if(pixel instanceof Enemy){
+				if(pixel.dist < 11)
+					shouldApply = true;
+			}
+		}
+			if(shouldApply){
+				health --;
+			}else if(health < 100)
+				health ++;
+				
+	}
+	
 	public void drawWeapon(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
 		if(coolDown == shotCoolDown-2){

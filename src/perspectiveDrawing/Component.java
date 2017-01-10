@@ -32,6 +32,7 @@ public class Component extends JComponent implements KeyListener {
 	ArrayList<Pixel> pixels = new ArrayList<Pixel>();
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	BufferedImage ground = new Image("img/ground.png").img;
+	BufferedImage deathImage = new Image("img/ghostScream.png").img;
 	int offsetX = 0;
 	int offsetY = 400;
 	Point2D mousePoint = null;
@@ -40,6 +41,9 @@ public class Component extends JComponent implements KeyListener {
 	int spawnFrequency = 200;
 	JFrame frame;
 	boolean shouldZoom = false;
+	int state = 0;
+	public static final int STATE_INGAME = 0;
+	public static final int STATE_DEAD = -1;
 
 	public Component() {
 		// pixels.add(new Pixel(20, 5, Color.ORANGE));
@@ -49,38 +53,46 @@ public class Component extends JComponent implements KeyListener {
 
 	@Override
 	public void paintComponent(Graphics g) {
+		switch (state) {
+		case STATE_INGAME:
+			if (player.health < 0) {
+				state = STATE_DEAD;
+			}
+			Graphics2D zoom = (Graphics2D) g;
+			if (shouldZoom) {
+				zoom.scale(2, 2);
+			}
+			Graphics2D g20 = (Graphics2D) g.create();
+			// g20.fill(new RoundRectangle2D.Double(460,300,70,200,100,200));
+			g.setColor(Color.darkGray.darker().darker().darker());
+			g.fillRect(0, 400, 1000, 200);
+			drawGround(g);
+			for (int i = 0; i < 200; i++) {
+				Color clr = new Color(0, 20, 0, (255 / 200) * i);
+				g.setColor(clr);
+				// g.fillRect(0, 599 - i, 1000, 1);
+			}
+			for (int i = 0; i < 200; i++) {
+				Color clr = new Color(0, 50, 80, i);
+				g.setColor(clr);
+				g.fillRect(0, 200 + i, 1000, 1);
+			}
+			player.drawRays(g);
+			if (isKeyDown(KeyEvent.VK_SPACE)) {
+				player.shoot();
+			}
+			player.draw(g);
+			movePlayer();
+			if (isKeyDown(KeyEvent.VK_Q))
+				drawPixels(g);
+			// g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
+			spawnGhost();
 
-		
-		Graphics2D zoom = (Graphics2D) g;
-		if (shouldZoom) {
-			zoom.scale(2, 2);
+			break;
+		case STATE_DEAD:
+			g.drawImage(deathImage, 0, 0, 1000, 600, null);
+			break;
 		}
-		Graphics2D g20 = (Graphics2D) g.create();
-		// g20.fill(new RoundRectangle2D.Double(460,300,70,200,100,200));
-		g.setColor(Color.darkGray.darker().darker().darker());
-		g.fillRect(0, 400, 1000, 200);
-		drawGround(g);
-		for (int i = 0; i < 200; i++) {
-			Color clr = new Color(0, 20, 0, (255 / 200) * i);
-			g.setColor(clr);
-			// g.fillRect(0, 599 - i, 1000, 1);
-		}
-		for (int i = 0; i < 200; i++) {
-			Color clr = new Color(0, 50, 80, i);
-			g.setColor(clr);
-			g.fillRect(0, 200 + i, 1000, 1);
-		}
-		player.drawRays(g);
-		if (isKeyDown(KeyEvent.VK_SPACE)) {
-			player.shoot();
-		}
-		player.draw(g);
-		movePlayer();
-		if (isKeyDown(KeyEvent.VK_Q))
-			drawPixels(g);
-		// g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
-		spawnGhost();
-
 	}
 
 	public void spawnGhost() {

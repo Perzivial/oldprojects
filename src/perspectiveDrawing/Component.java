@@ -33,7 +33,7 @@ public class Component extends JComponent implements KeyListener {
 	ArrayList<Pixel> pixels = new ArrayList<Pixel>();
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	BufferedImage ground = new Image("img/ground.png").img;
-	BufferedImage deathImage = new Image("img/ghostScream.png").img;
+	BufferedImage deathImage = new Image("img/ghostscream.png").img;
 	public static BufferedImage enemyImg = new Image("img/ghost.png").getScaledInstance(
 			new Image("img/ghost.png").img.getWidth() / 5, new Image("img/ghost.png").img.getHeight() / 5);
 	public static BufferedImage enemyAngryImg = new Image("img/ghostAngry.png").getScaledInstance(
@@ -170,7 +170,10 @@ public class Component extends JComponent implements KeyListener {
 						Color.red, this);
 
 				pixels.add(temp);
-				spawnTimer = spawnFrequency;
+				spawnTimer = spawnFrequency-player.score*5;
+				if(spawnTimer <= 20)
+					spawnTimer = 20;
+					
 			} else {
 				spawnTimer--;
 			}

@@ -33,12 +33,12 @@ public class Player {
 	public static BufferedImage img = new Image("img/wall.png").img;
 	int health = 100;
 	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
-	BufferedImage ghostIcon = new Image("img/ghostIcon.png").img;
+	BufferedImage ghostIcon = new Image("img/ghosticon.png").img;
 	boolean queueShot = false;
 	int damage = 25;
 	int shotCoolDown = 15;
 	int coolDown = 0;
-	
+	int score = 0;
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;
@@ -136,6 +136,7 @@ public class Player {
 								if (((Enemy) pixel).health <= 0) {
 									toRemove.add(pixel);
 									((Enemy) pixel).playDeadSound();
+									score ++;
 								}
 								hasHit = true;
 							}

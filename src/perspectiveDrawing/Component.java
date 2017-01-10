@@ -2,6 +2,7 @@ package perspectiveDrawing;
 
 import java.awt.AWTException;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -28,11 +29,15 @@ import javax.swing.JFrame;
 
 public class Component extends JComponent implements KeyListener {
 
-	Player player = new Player(0, 5, 90, this);
+	Player player = new Player(0, 5, 0, this);
 	ArrayList<Pixel> pixels = new ArrayList<Pixel>();
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	BufferedImage ground = new Image("img/ground.png").img;
 	BufferedImage deathImage = new Image("img/ghostScream.png").img;
+	public static BufferedImage enemyImg = new Image("img/ghost.png").getScaledInstance(
+			new Image("img/ghost.png").img.getWidth() / 5, new Image("img/ghost.png").img.getHeight() / 5);
+	public static BufferedImage enemyAngryImg = new Image("img/ghostAngry.png").getScaledInstance(
+			new Image("img/ghostAngry.png").img.getWidth() / 5, new Image("img/ghostAngry.png").img.getHeight() / 5);
 	int offsetX = 0;
 	int offsetY = 400;
 	Point2D mousePoint = null;
@@ -41,14 +46,20 @@ public class Component extends JComponent implements KeyListener {
 	int spawnFrequency = 200;
 	JFrame frame;
 	boolean shouldZoom = false;
-	int state = 0;
+	int state = 1;
 	public static final int STATE_INGAME = 0;
 	public static final int STATE_DEAD = -1;
+	public static final int STATE_MENU = 1;
+	public static final int STATE_CONTROLS = 2;
+	int resetCounter = 60;
+	boolean menuCursor = true;
 
 	public Component() {
 		// pixels.add(new Pixel(20, 5, Color.ORANGE));
 		// pixels.add(new Pixel(20, 20, Color.green));
+
 		placePixelsBasedOnTextFile();
+
 	}
 
 	@Override
@@ -91,8 +102,59 @@ public class Component extends JComponent implements KeyListener {
 			break;
 		case STATE_DEAD:
 			g.drawImage(deathImage, 0, 0, 1000, 600, null);
+			resetCounter--;
+			if (resetCounter <= 0) {
+				reset();
+				state = STATE_MENU;
+			}
+			break;
+		case STATE_MENU:
+			g.fillRect(0, 0, 1000, 600);
+			player.drawRays(g);
+			player.angle += 1;
+			drawMenu(g);
+			break;
+		case STATE_CONTROLS:
+			drawControls(g);
 			break;
 		}
+		
+	}
+
+	public void reset() {
+		pixels.clear();
+		player = new Player(0, 0, 0, this);
+		placePixelsBasedOnTextFile();
+		resetCounter = 100;
+		state = STATE_INGAME;
+		spawnTimer = 100;
+	}
+
+	public void drawMenu(Graphics g) {
+		g.setColor(Color.white);
+		g.setFont(new Font(g.getFont().getFontName(), 10, 80));
+		g.drawString("Spoopy", 350, 100);
+		g.setFont(new Font(g.getFont().getFontName(), 10, 20));
+		g.drawString("Start", 470, 200);
+		g.drawString("Controls", 450, 300);
+		if (menuCursor == true)
+			g.fillOval(455, 188, 10, 10);
+		else
+			g.fillOval(435, 288, 10, 10);
+	}
+
+	public void drawControls(Graphics g) {
+		g.setColor(Color.white);
+		g.setFont(new Font(g.getFont().getFontName(), 10, 80));
+		g.drawString("Controls", 350, 100);
+		g.setFont(new Font(g.getFont().getFontName(), 10, 20));
+		g.drawString("W - Forward", 450, 200);
+		g.drawString("S - Backward", 450, 250);
+		g.drawString("Right Arrow - Turn Right", 400, 300);
+		g.drawString("Left Arrow - Turn Left", 400, 350);
+		g.drawString("A - Strafe Left", 450, 400);
+		g.drawString("D - Strafe Right", 450, 450);
+		g.drawString("Press any key to return to menu", 370, 550);
 	}
 
 	public void spawnGhost() {
@@ -157,23 +219,24 @@ public class Component extends JComponent implements KeyListener {
 	}
 
 	public void movePlayer() {
-		if (isKeyDown(KeyEvent.VK_W)) {
-			player.goForward();
-		} else if (isKeyDown(KeyEvent.VK_S))
-			player.goBackward();
-		if (isKeyDown(KeyEvent.VK_A)) {
-			player.walkLeft();
-			offsetX += 3;
+		if (state == STATE_INGAME) {
+			if (isKeyDown(KeyEvent.VK_W)) {
+				player.goForward();
+			} else if (isKeyDown(KeyEvent.VK_S))
+				player.goBackward();
+			if (isKeyDown(KeyEvent.VK_A)) {
+				player.walkLeft();
+				offsetX += 3;
+			}
+			if (isKeyDown(KeyEvent.VK_D)) {
+				player.walkRight();
+				offsetX -= 3;
+			}
+			if (isKeyDown(KeyEvent.VK_LEFT))
+				player.rotateLeft();
+			if (isKeyDown(KeyEvent.VK_RIGHT))
+				player.rotateRight();
 		}
-		if (isKeyDown(KeyEvent.VK_D)) {
-			player.walkRight();
-			offsetX -= 3;
-		}
-		if (isKeyDown(KeyEvent.VK_LEFT))
-			player.rotateLeft();
-		if (isKeyDown(KeyEvent.VK_RIGHT))
-			player.rotateRight();
-
 	}
 
 	@Override
@@ -184,7 +247,24 @@ public class Component extends JComponent implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		switch (state) {
+		case STATE_MENU:
+			if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
+				menuCursor = !menuCursor;
+			}
+			if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) {
+				if (menuCursor) {
+					reset();
+					menuCursor = true;
+				} else
+					state = STATE_CONTROLS;
 
+			}
+			break;
+		case STATE_CONTROLS:
+			state = STATE_MENU;
+			break;
+		}
 		keysPressed.add(e.getKeyCode());
 		// TODO Auto-generated method stub
 		/*

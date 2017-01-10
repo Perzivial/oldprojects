@@ -38,7 +38,7 @@ public class Player {
 	int damage = 25;
 	int shotCoolDown = 15;
 	int coolDown = 0;
-
+	
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;

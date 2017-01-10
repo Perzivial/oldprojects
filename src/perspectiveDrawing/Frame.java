@@ -53,7 +53,7 @@ public class Frame extends JFrame {
 		frame.add(theComponent);
 		frame.setSize(1000, 600);
 		frame.setLocationRelativeTo(null);
-		frame.setTitle("Spare Management System");
+		frame.setTitle(s);
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		theComponent.addKeyListener(theComponent);
@@ -94,7 +94,7 @@ public class Frame extends JFrame {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new Frame("Spooky");
+		new Frame("Spoopy");
 		timer.start();
 
 	}

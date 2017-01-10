@@ -13,8 +13,7 @@ public class Enemy extends Pixel {
 	double speed = 1;
 	int amountHit = 0;
 	ArrayList<Rectangle> columns = new ArrayList<Rectangle>();
-	public static BufferedImage enemyImg = new Image("img/ghost.png").getScaledInstance(new Image("img/ghost.png").img.getWidth()/5, new Image("img/ghost.png").img.getHeight()/5);
-	public static BufferedImage enemyAngryImg = new Image("img/ghostAngry.png").getScaledInstance(new Image("img/ghostAngry.png").img.getWidth()/5, new Image("img/ghostAngry.png").img.getHeight()/5);
+	
 	int hitTimer = 0;
 	int health = 100;
 	Sound hurtSound = new Sound("sound/ghosthurt.wav");
@@ -30,10 +29,10 @@ public class Enemy extends Pixel {
 			try{
 			// g2.fill(current);
 			if (hitTimer <= 0)
-				g2.drawImage(comp.getSlice(enemyImg, columns.indexOf(current), columns.size()), current.x, current.y,
+				g2.drawImage(comp.getSlice(comp.enemyImg, columns.indexOf(current), columns.size()), current.x, current.y,
 						current.width, current.height, null);
 			else
-				g2.drawImage(comp.getSlice(enemyAngryImg, columns.indexOf(current), columns.size()), current.x,
+				g2.drawImage(comp.getSlice(comp.enemyAngryImg, columns.indexOf(current), columns.size()), current.x,
 						current.y, current.width, current.height, null);
 			}catch(Exception e){
 				

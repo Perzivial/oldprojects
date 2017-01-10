@@ -18,6 +18,8 @@ public class Enemy extends Pixel {
 	int health = 100;
 	Sound hurtSound = new Sound("sound/ghosthurt.wav");
 	Sound deadSound = new Sound("sound/ghostdie.wav");
+	public static BufferedImage enemyImg = new Image("img/ghost.png").getScaledInstance(133,269);
+	public static BufferedImage enemyAngryImg = new Image("img/ghostAngry.png").getScaledInstance(133,269);
 	public Enemy(double xpos, double ypos, Color clr, Component myComp) {
 		super(xpos, ypos, clr);
 		comp = myComp;
@@ -29,10 +31,10 @@ public class Enemy extends Pixel {
 			try{
 			// g2.fill(current);
 			if (hitTimer <= 0)
-				g2.drawImage(comp.getSlice(comp.enemyImg, columns.indexOf(current), columns.size()), current.x, current.y,
+				g2.drawImage(comp.getSlice(enemyImg, columns.indexOf(current), columns.size()), current.x, current.y,
 						current.width, current.height, null);
 			else
-				g2.drawImage(comp.getSlice(comp.enemyAngryImg, columns.indexOf(current), columns.size()), current.x,
+				g2.drawImage(comp.getSlice(enemyAngryImg, columns.indexOf(current), columns.size()), current.x,
 						current.y, current.width, current.height, null);
 			}catch(Exception e){
 				

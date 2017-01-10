@@ -17,8 +17,16 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -26,18 +34,24 @@ import java.util.StringTokenizer;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class Component extends JComponent implements KeyListener {
+	String tempServerName = "localhost";
+	String tempPort = "";
+	Socket client = null;
+	DataInputStream in = null;
+	private ServerSocket serverSocket;
+	Socket server = null;
 
+	GhostPlayer otherguy = new GhostPlayer(Integer.MAX_VALUE, Integer.MAX_VALUE, Color.red, this);
 	Player player = new Player(0, 5, 0, this);
 	ArrayList<Pixel> pixels = new ArrayList<Pixel>();
 	HashSet<Integer> keysPressed = new HashSet<Integer>();
 	BufferedImage ground = new Image("img/ground.png").img;
 	BufferedImage deathImage = new Image("img/ghostscream.png").img;
-	public static BufferedImage enemyImg = new Image("img/ghost.png").getScaledInstance(
-			new Image("img/ghost.png").img.getWidth() / 5, new Image("img/ghost.png").img.getHeight() / 5);
-	public static BufferedImage enemyAngryImg = new Image("img/ghostAngry.png").getScaledInstance(
-			new Image("img/ghostAngry.png").img.getWidth() / 5, new Image("img/ghostAngry.png").img.getHeight() / 5);
+
 	int offsetX = 0;
 	int offsetY = 400;
 	Point2D mousePoint = null;
@@ -51,15 +65,20 @@ public class Component extends JComponent implements KeyListener {
 	public static final int STATE_DEAD = -1;
 	public static final int STATE_MENU = 1;
 	public static final int STATE_CONTROLS = 2;
+	public static final int STATE_MULTIPLAYER_SETUP = 3;
+	public static final int STATE_SETUP_SERVER = 4;
+	public static final int STATE_SETUP_CLIENT = 5;
 	int resetCounter = 60;
 	boolean menuCursor = true;
+	boolean shouldSpawn = true;
+	boolean isEditingPort = true;
 
 	public Component() {
 		// pixels.add(new Pixel(20, 5, Color.ORANGE));
 		// pixels.add(new Pixel(20, 20, Color.green));
 
 		placePixelsBasedOnTextFile();
-
+		// connectToServer();
 	}
 
 	@Override
@@ -98,7 +117,32 @@ public class Component extends JComponent implements KeyListener {
 				drawPixels(g);
 			// g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
 			spawnGhost();
+			if (client != null) {
+				if (player.coolDown != player.shotCoolDown - 2)
+					sendToClient(player.x + "," + player.y);
+				else
+					sendToServer(player.x + "," + player.y + ",");
 
+				String info = readFromClient();
+				otherguy.x = Double.parseDouble(info.split(",")[0]);
+				otherguy.y = Double.parseDouble(info.split(",")[1]);
+				if (info.split("'").length == 3) {
+					otherguy.shotTimer = 1;
+				}
+			}
+			if (server != null) {
+				if (player.coolDown != player.shotCoolDown - 2)
+					sendToServer(player.x + "," + player.y);
+				else
+					sendToServer(player.x + "," + player.y + ",");
+
+				String info = readFromServer();
+				otherguy.x = Double.parseDouble(info.split(",")[0]);
+				otherguy.y = Double.parseDouble(info.split(",")[1]);
+				if (info.split("'").length == 3) {
+					otherguy.shotTimer = 1;
+				}
+			}
 			break;
 		case STATE_DEAD:
 			g.drawImage(deathImage, 0, 0, 1000, 600, null);
@@ -117,8 +161,23 @@ public class Component extends JComponent implements KeyListener {
 		case STATE_CONTROLS:
 			drawControls(g);
 			break;
+		case STATE_MULTIPLAYER_SETUP:
+			g.setColor(Color.white);
+			g.drawString("Please press 1 to setup a server, or 2 to join one", 10, 50);
+			break;
+		case STATE_SETUP_SERVER:
+			g.setColor(Color.white);
+			g.drawString("Port num: " + tempPort, 10, 50);
+			g.drawString("Press enter when ready", 10, 150);
+			break;
+		case STATE_SETUP_CLIENT:
+			g.setColor(Color.white);
+			g.drawString("Port num: " + tempPort, 10, 50);
+			g.drawString("Server name: " + tempServerName, 10, 100);
+			g.drawString("Press enter when ready", 10, 200);
+			break;
 		}
-		
+
 	}
 
 	public void reset() {
@@ -158,24 +217,26 @@ public class Component extends JComponent implements KeyListener {
 	}
 
 	public void spawnGhost() {
-		int amountGhosts = 0;
-		for (Pixel pixel : pixels) {
-			if (pixel instanceof Enemy)
-				amountGhosts++;
-		}
-		if (amountGhosts < 5) {
-			if (spawnTimer <= 0) {
+		if (shouldSpawn) {
+			int amountGhosts = 0;
+			for (Pixel pixel : pixels) {
+				if (pixel instanceof Enemy)
+					amountGhosts++;
+			}
+			if (amountGhosts < 5) {
+				if (spawnTimer <= 0) {
 
-				Enemy temp = new Enemy(player.x + Helper.randInt(-50, 50), player.y + Helper.randInt(-50, 50),
-						Color.red, this);
+					Enemy temp = new Enemy(player.x + Helper.randInt(-50, 50), player.y + Helper.randInt(-50, 50),
+							Color.red, this);
 
-				pixels.add(temp);
-				spawnTimer = spawnFrequency-player.score*5;
-				if(spawnTimer <= 20)
-					spawnTimer = 20;
-					
-			} else {
-				spawnTimer--;
+					pixels.add(temp);
+					spawnTimer = spawnFrequency - player.score * 5;
+					if (spawnTimer <= 20)
+						spawnTimer = 20;
+
+				} else {
+					spawnTimer--;
+				}
 			}
 		}
 	}
@@ -263,11 +324,62 @@ public class Component extends JComponent implements KeyListener {
 					state = STATE_CONTROLS;
 
 			}
+			if (e.getKeyCode() == KeyEvent.VK_M)
+				state = STATE_MULTIPLAYER_SETUP;
 			break;
 		case STATE_CONTROLS:
 			state = STATE_MENU;
 			break;
+		case STATE_MULTIPLAYER_SETUP:
+			switch (e.getKeyCode()) {
+			case KeyEvent.VK_1:
+				state = STATE_SETUP_SERVER;
+				break;
+			case KeyEvent.VK_2:
+				state = STATE_SETUP_CLIENT;
+				break;
+			case KeyEvent.VK_ESCAPE:
+				state = STATE_MENU;
+				break;
+			}
+			break;
+		case STATE_SETUP_SERVER:
+			if (Character.isDigit(e.getKeyChar())) {
+				tempPort += e.getKeyChar();
+			}
+			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE)
+				if (tempPort.length() > 0)
+					tempPort = tempPort.substring(0, tempPort.length() - 1);
+			if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				run(Integer.parseInt(tempPort));
+			break;
+		case STATE_SETUP_CLIENT:
+			if (isEditingPort) {
+				if (Character.isDigit(e.getKeyChar())) {
+					tempPort += e.getKeyChar();
+				}
+			} else {
+				if (e.getKeyCode() != KeyEvent.VK_BACK_SPACE)
+					tempServerName += e.getKeyChar();
+			}
+			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
+
+				if (isEditingPort) {
+					if (tempPort.length() > 0)
+						tempPort = tempPort.substring(0, tempPort.length() - 1);
+				} else {
+					if (tempServerName.length() > 0)
+						tempServerName = tempServerName.substring(0, tempServerName.length() - 1);
+				}
+			}
+			if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
+				isEditingPort = !isEditingPort;
+			}
+			if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				connectToServer(tempServerName, Integer.parseInt(tempPort));
+			break;
 		}
+
 		keysPressed.add(e.getKeyCode());
 		// TODO Auto-generated method stub
 		/*
@@ -346,4 +458,106 @@ public class Component extends JComponent implements KeyListener {
 		}
 	}
 
+	public void connectToServer(String serverName, int port) {
+		shouldSpawn = false;
+		try {
+			// System.out.println("Connecting to " + serverName + " on port " +
+			// port);
+			client = new Socket(serverName, port);
+
+			System.out.println("Just connected to " + client.getRemoteSocketAddress());
+			OutputStream outToServer = client.getOutputStream();
+			DataOutputStream out = new DataOutputStream(outToServer);
+
+			out.writeUTF("Hello from " + client.getLocalSocketAddress());
+			InputStream inFromServer = client.getInputStream();
+			in = new DataInputStream(inFromServer);
+
+			System.out.println("Server says " + in.readUTF());
+			reset();
+			pixels.add(otherguy);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendToClient(String outStr) {
+		OutputStream outToServer;
+		try {
+			outToServer = client.getOutputStream();
+
+			DataOutputStream out = new DataOutputStream(outToServer);
+			out.writeUTF(outStr);
+			System.out.println("The size of the outgoing info is " + out.size());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendToServer(String outStr) {
+		OutputStream outToClient;
+		try {
+			outToClient = server.getOutputStream();
+
+			DataOutputStream out = new DataOutputStream(outToClient);
+			out.writeUTF(outStr);
+			System.out.println("The size of the outgoing info is " + out.size());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String readFromServer() {
+		InputStream inFromServer;
+		try {
+			inFromServer = server.getInputStream();
+			in = new DataInputStream(inFromServer);
+			return in.readUTF();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	public String readFromClient() {
+		InputStream inFromClient;
+		try {
+			inFromClient = client.getInputStream();
+			in = new DataInputStream(inFromClient);
+			return in.readUTF();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	public void run(int port) {
+		shouldSpawn = false;
+		try {
+			serverSocket = new ServerSocket(port);
+			serverSocket.setSoTimeout(10000);
+
+			System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
+			server = serverSocket.accept();
+
+			System.out.println("Just connected to " + server.getRemoteSocketAddress());
+			in = new DataInputStream(server.getInputStream());
+
+			System.out.println(in.readUTF());
+			DataOutputStream out = new DataOutputStream(server.getOutputStream());
+			out.writeUTF("Thank you for connecting to " + server.getLocalSocketAddress());
+			// server.close();
+			reset();
+			pixels.add(otherguy);
+		} catch (SocketTimeoutException s) {
+			System.out.println("Socket timed out!");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+
+		}
+
+	}
 }

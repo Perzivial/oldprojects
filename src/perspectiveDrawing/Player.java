@@ -49,6 +49,7 @@ public class Player {
 	public void draw(Graphics g) {
 		Graphics gSep = g.create();
 		Graphics2D g2 = (Graphics2D) g;
+		
 		for (Pixel pixel : comp.pixels) {
 			if (pixel instanceof Enemy) {
 				((Enemy) pixel).drawColumns(g2);
@@ -96,7 +97,7 @@ public class Player {
 	public void damage() {
 		boolean shouldApply = false;
 		for (Pixel pixel : comp.pixels) {
-			if (pixel instanceof Enemy) {
+			if (pixel instanceof Enemy && !(pixel instanceof GhostPlayer)) {
 				if (pixel.dist < 11)
 					shouldApply = true;
 			}
@@ -124,7 +125,7 @@ public class Player {
 			shot.play();
 			for (Pixel pixel : comp.pixels) {
 
-				if (pixel instanceof Enemy) {
+				if (pixel instanceof Enemy && !(pixel instanceof GhostPlayer)) {
 					RoundRectangle2D rectmy = new RoundRectangle2D.Double(460, 300, 70, 200, 100, 200);
 					boolean hasHit = false;
 					for (Rectangle rect2 : ((Enemy) pixel).columns) {
@@ -415,23 +416,7 @@ public class Player {
 					} catch (Exception e) {
 
 					}
-					/*
-					 * FlatteningPathIterator it = new
-					 * FlatteningPathIterator(line.getPathIterator(g2.
-					 * getTransform()),1); float[] coords=new float[2];
-					 * ArrayList<Point2D> points = new ArrayList<Point2D>();
-					 * while (!it.isDone()) {
-					 * 
-					 * it.currentSegment(coords); int x=(int)coords[0]; int
-					 * y=(int)coords[1]; points.add(new Point2D.Double(x,y));
-					 * it.next();
-					 * 
-					 * } for(Point2D pointTemp : points){
-					 * System.out.println(pointTemp.getX() + " ," +
-					 * pointTemp.getY()); g2.setColor(Color.red);
-					 * g2.drawRect((int)pointTemp.getX()-1,(int)pointTemp.getY()
-					 * -1,2,2); }
-					 */
+
 
 				}
 			}
@@ -450,7 +435,7 @@ public class Player {
 					Line2D sideLine2 = new Line2D.Double(pixel.x, pixel.y + 10, pixel.x + 10, pixel.y + 10);
 					Line2D sideLine3 = new Line2D.Double(pixel.x, pixel.y, pixel.x, pixel.y + 10);
 					Line2D sideLine4 = new Line2D.Double(pixel.x + 10, pixel.y, pixel.x + 10, pixel.y + 10);
-
+					
 					if (line.intersectsLine(sideLine1)) {
 						double tempX = lineIntersectPoint(line, sideLine1).getX();
 						double tempY = lineIntersectPoint(line, sideLine1).getY();

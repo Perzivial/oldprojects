@@ -13,8 +13,8 @@ public class Enemy extends Pixel {
 	double speed = 1;
 	int amountHit = 0;
 	ArrayList<Rectangle> columns = new ArrayList<Rectangle>();
-	BufferedImage enemyImg = new Image("img/ghost.png").getScaledInstance(new Image("img/ghost.png").img.getWidth()/5, new Image("img/ghost.png").img.getHeight()/5);
-	BufferedImage enemyAngryImg = new Image("img/ghostAngry.png").getScaledInstance(new Image("img/ghostAngry.png").img.getWidth()/5, new Image("img/ghostAngry.png").img.getHeight()/5);
+	public static BufferedImage enemyImg = new Image("img/ghost.png").getScaledInstance(new Image("img/ghost.png").img.getWidth()/5, new Image("img/ghost.png").img.getHeight()/5);
+	public static BufferedImage enemyAngryImg = new Image("img/ghostAngry.png").getScaledInstance(new Image("img/ghostAngry.png").img.getWidth()/5, new Image("img/ghostAngry.png").img.getHeight()/5);
 	int hitTimer = 0;
 	int health = 100;
 	Sound hurtSound = new Sound("sound/ghosthurt.wav");

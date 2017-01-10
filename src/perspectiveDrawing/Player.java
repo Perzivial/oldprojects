@@ -1,6 +1,7 @@
 package perspectiveDrawing;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
@@ -32,6 +33,7 @@ public class Player {
 	public static BufferedImage img = new Image("img/wall.png").img;
 	int health = 100;
 	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
+	BufferedImage ghostIcon = new Image("img/ghostIcon.png").img;
 	boolean queueShot = false;
 	int damage = 25;
 	int shotCoolDown = 15;
@@ -54,12 +56,12 @@ public class Player {
 		}
 		g2.translate(1000, 0);
 		g2.scale(-1, 1);
-		if(comp.isKeyDown(KeyEvent.VK_Q)){
-		g.setColor(Color.white);
-		g.fillRect((int) x, (int) y, 5, 5);
-		g.setColor(Color.red);
-		g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (50 * Math.sin(Math.toRadians(angle))),
-				((int) y + 2) + (int) (50 * Math.cos(Math.toRadians(angle))));
+		if (comp.isKeyDown(KeyEvent.VK_Q)) {
+			g.setColor(Color.white);
+			g.fillRect((int) x, (int) y, 5, 5);
+			g.setColor(Color.red);
+			g.drawLine((int) x + 2, (int) y + 2, ((int) x + 2) + (int) (50 * Math.sin(Math.toRadians(angle))),
+					((int) y + 2) + (int) (50 * Math.cos(Math.toRadians(angle))));
 		}
 		drawWeapon(g);
 		g.setColor(Color.red);
@@ -72,34 +74,47 @@ public class Player {
 		damage();
 		drawHealthBar(gSep);
 	}
-		
-	public void drawHealthBar(Graphics g){
+
+	public void drawHealthBar(Graphics g) {
 		g.setColor(Color.green);
 		g.fillRect(20, 510, health * 2, 50);
+		int numGhosts = 0;
+		for (Pixel pixel : comp.pixels) {
+			if (pixel instanceof Enemy) {
+				if(pixel.dist < 20)
+				numGhosts++;
+			}
+		}
+		if(numGhosts > 0){
+			g.drawImage(ghostIcon, 20, 450, 50,50,null);
+			g.setFont(new Font(g.getFont().getFontName(),50,40));
+			g.setColor(Color.white);
+			g.drawString(Integer.toString(numGhosts), 70, 490);
+		}
 	}
-	
-	public void damage(){
+
+	public void damage() {
 		boolean shouldApply = false;
-		for(Pixel pixel:comp.pixels){
-			if(pixel instanceof Enemy){
-				if(pixel.dist < 11)
+		for (Pixel pixel : comp.pixels) {
+			if (pixel instanceof Enemy) {
+				if (pixel.dist < 11)
 					shouldApply = true;
 			}
 		}
-			if(shouldApply){
-				health --;
-			}else if(health < 100)
-				health ++;
-				
+		if (shouldApply) {
+			health--;
+		} else if (health < 100)
+			health++;
+
 	}
-	
+
 	public void drawWeapon(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
-		if(coolDown == shotCoolDown-2){
+		if (coolDown == shotCoolDown - 2) {
 			g2.setColor(Color.white);
 			g2.fillOval(410, 350, 150, 150);
 		}
-		g2.drawImage(shotgun, 400-coolDown*2, 400+coolDown, 200+coolDown, 200, null);
+		g2.drawImage(shotgun, 400 - coolDown * 2, 400 + coolDown, 200 + coolDown, 200, null);
 	}
 
 	public void shoot() {
@@ -118,7 +133,7 @@ public class Player {
 								((Enemy) pixel).health -= damage;
 								((Enemy) pixel).hitTimer = 5;
 								((Enemy) pixel).playHurtSound();
-								if (((Enemy) pixel).health <= 0){
+								if (((Enemy) pixel).health <= 0) {
 									toRemove.add(pixel);
 									((Enemy) pixel).playDeadSound();
 								}
@@ -141,8 +156,8 @@ public class Player {
 		y += 2 * Math.cos(Math.toRadians(angle));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
-				if(!(pixel instanceof Enemy))
-				goBackward();
+				if (!(pixel instanceof Enemy))
+					goBackward();
 		}
 	}
 
@@ -151,8 +166,8 @@ public class Player {
 		y -= 2 * Math.cos(Math.toRadians(angle));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
-				if(!(pixel instanceof Enemy))
-				goForward();
+				if (!(pixel instanceof Enemy))
+					goForward();
 		}
 	}
 
@@ -169,8 +184,8 @@ public class Player {
 		y += 1 * Math.cos(Math.toRadians(angle - 90));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
-				if(!(pixel instanceof Enemy))
-				walkRight();
+				if (!(pixel instanceof Enemy))
+					walkRight();
 		}
 	}
 
@@ -179,8 +194,8 @@ public class Player {
 		y += 1 * Math.cos(Math.toRadians(angle + 90));
 		for (Pixel pixel : comp.pixels) {
 			if (new Rectangle2D.Double(x, y, 5, 5).intersects(pixel.rect))
-				if(!(pixel instanceof Enemy))
-				walkLeft();
+				if (!(pixel instanceof Enemy))
+					walkLeft();
 		}
 	}
 
@@ -420,9 +435,9 @@ public class Player {
 				}
 			}
 			// comp.sortPixelsByDistance();
-			try{
-			Collections.sort(comp.pixels);
-			}catch(Exception e){
+			try {
+				Collections.sort(comp.pixels);
+			} catch (Exception e) {
 				System.out.println("an error occured while sorting the pixel array");
 			}
 			// Collections.reverse(comp.pixels);

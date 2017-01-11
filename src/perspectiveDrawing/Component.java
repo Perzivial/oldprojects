@@ -485,7 +485,11 @@ public class Component extends JComponent implements KeyListener {
 					// System.out.println(count);
 				} else if (token.contains("2")) {
 					pixels.add(new Pixel(count * 10, countLine * 10, Color.gray));
-				} else if (token.contains("p")) {
+				}  else if (token.contains("3")) {
+					pixels.add(new Pixel(count * 10, countLine * 10, Color.green));
+				} else if (token.contains("4")) {
+					pixels.add(new Light(count * 10, countLine * 10, Color.orange, 50));
+				}else if (token.contains("p")) {
 					player.x = (count * 10) + 5;
 					player.y = (countLine * 10) + 5;
 				} else if (token.contains("e")) {

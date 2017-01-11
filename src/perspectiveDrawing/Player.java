@@ -123,8 +123,8 @@ public class Player {
 	public void shoot() {
 		ArrayList<Pixel> toRemove = new ArrayList<Pixel>();
 		if (coolDown <= 0) {
-			 Sound shot = new Sound("sound/gunshot.wav");
-			 shot.play();
+			Sound shot = new Sound("sound/gunshot.wav");
+			shot.play();
 			for (Pixel pixel : comp.pixels) {
 
 				if (pixel instanceof Enemy && !(pixel instanceof GhostPlayer)) {
@@ -360,6 +360,12 @@ public class Player {
 		return null;
 	}
 
+	public Point2D getPointOnRect(Line2D line, Pixel pixel, double angle) {
+		double dist = getDistToRect(line, pixel);
+		return new Point2D.Double(line.getX1() + (dist * Math.sin(Math.toRadians(angle))),
+				line.getY1() + (dist * Math.cos(Math.toRadians(angle))));
+	}
+
 	// draws a specified number of rays to hit stuff and draw them accordingly
 	public void drawRays(Graphics g) {
 
@@ -396,8 +402,8 @@ public class Player {
 						pixel.dist = getDistToRect(line, pixel);
 						pixel.z = -pixel.dist / 2;
 						if (pixel instanceof Enemy)
-					
-						pixel.z = line.getP1().distance(new Point2D.Double(pixel.x + 5, pixel.y + 5));
+
+							pixel.z = line.getP1().distance(new Point2D.Double(pixel.x + 5, pixel.y + 5));
 						// pixel.z = (-pixel.dist
 						// *Math.sin(Math.toRadians(90)))/Math.sin(Math.toRadians(tempangle));
 						// pixel.z =(pixel.dist * -Math.cos(addAngle));
@@ -491,10 +497,15 @@ public class Player {
 						} else
 							g.setColor(pixel.color);
 					}
+
+					int red = g.getColor().getRed();
+					int green = g.getColor().getGreen();
+					int blue = g.getColor().getBlue();
+
 					// g3.setColor(pixel.color);
-					int red = g.getColor().getRed() - (int) pixel.dist;
-					int green = g.getColor().getGreen() - (int) pixel.dist;
-					int blue = g.getColor().getBlue() - (int) pixel.dist;
+					red = g.getColor().getRed() - (int) pixel.dist;
+					green = g.getColor().getGreen() - (int) pixel.dist;
+					blue = g.getColor().getBlue() - (int) pixel.dist;
 					if (red > 255)
 						red = 255;
 					if (red < 0)
@@ -507,6 +518,7 @@ public class Player {
 						blue = 255;
 					if (blue < 0)
 						blue = 0;
+
 					g3.setColor(new Color(red, green, blue));
 					g3.translate(0, 100);
 					// System.out.println(pixel.z);
@@ -525,6 +537,22 @@ public class Player {
 							g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
 									(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2, (int) (1000 / resolution),
 									(int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
+							for (Pixel light : comp.pixels) {
+								if (light instanceof Light) {
+									Point2D myPoint = getPointOnRect(line, pixel, tempangle);
+									if (myPoint.distance(((Light) light).point) < ((Light) light).radius) {
+										g3.setColor(new Color(light.color.getRed(), light.color.getGreen(),
+												light.color.getBlue(), (int) (((Light) light).radius
+														- myPoint.distance(((Light) light).point))*2));
+										
+										g3.fillRect((int) ((double) 1000 / (double) resolution) * i,
+												(int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2,
+												(int) (1000 / resolution), (int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z));
+
+									}
+								}
+							}
+
 						} else {
 							((Enemy) pixel).amountHit++;
 							((Enemy) pixel).columns.add(new Rectangle((int) ((double) 1000 / (double) resolution) * i,
@@ -532,11 +560,10 @@ public class Player {
 											+ ((int) ((WALL_HEIGHT * WALL_HEIGHT / pixel.z)) / 2)),
 									(int) (1000 / resolution), (int) (WALL_HEIGHT * WALL_HEIGHT / pixel.z)));
 						}
-						Point2D myPoint = getCollisionPointOnRect(line, pixel);
+						Point2D myPoint = getPointOnRect(line, pixel, tempangle);
 
-						g3.setColor(Color.red);
-						// g3.fillRect((int)myPoint.getX()-1,
-						// (int)myPoint.getY()-1, 2, 2);
+						g.setColor(Color.red);
+						g.fillRect((int) myPoint.getX() - 1, (int) myPoint.getY() - 1, 2, 2);
 						// g3.translate(200, 200);
 						g3.setColor(Color.green);
 						// g3.draw(sideLine4);

@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 public class GhostPlayer extends Enemy {
 	public static BufferedImage shoot = new Image("img/gunGhostShoot.png").getScaledInstance(133, 269);
 	int shotTimer = 0;
+
 	public GhostPlayer(double xpos, double ypos, Color clr, Component myComp) {
 		super(xpos, ypos, clr, myComp);
 		enemyImg = new Image("img/gunGhost.png").getScaledInstance(133, 269);
@@ -21,38 +22,45 @@ public class GhostPlayer extends Enemy {
 
 		for (Rectangle current : columns) {
 			try {
-				if(shotTimer == 0){
-				// g2.fill(current);
-				if (hitTimer <= 0)
-					g2.drawImage(comp.getSlice(enemyImg, columns.indexOf(current), columns.size()), current.x,
-							current.y, current.width, current.height, null);
-				else
-					g2.drawImage(comp.getSlice(enemyAngryImg, columns.indexOf(current), columns.size()), current.x,
-							current.y, current.width, current.height, null);
-				}else{
+				if (shotTimer == 0) {
+					// g2.fill(current);
+					if (hitTimer <= 0)
+						g2.drawImage(comp.getSlice(enemyImg, columns.indexOf(current), columns.size()), current.x,
+								current.y, current.width, current.height, null);
+					else
+						g2.drawImage(comp.getSlice(enemyAngryImg, columns.indexOf(current), columns.size()), current.x,
+								current.y, current.width, current.height, null);
+				} else {
 					if (hitTimer <= 0)
 						g2.drawImage(comp.getSlice(shoot, columns.indexOf(current), columns.size()), current.x,
 								current.y, current.width, current.height, null);
 					else
 						g2.drawImage(comp.getSlice(shoot, columns.indexOf(current), columns.size()), current.x,
 								current.y, current.width, current.height, null);
-					
+
 					System.out.println("bang");
 				}
 			} catch (Exception e) {
 
 			}
+			int transparency = (int) this.dist * 5;
+			if (transparency > 255)
+				transparency = 255;
+			g2.setColor(new Color(0, 0, 0, transparency));
+			g2.fill(current);
 		}
-		if(shotTimer != 0){
-		shotTimer --;
-		Sound shot = new Sound("sound/gunshot.wav");
-		if(new Point2D.Double(comp.player.x + 2.5,comp.player.y + 2.5).distance(new Point2D.Double(this.x+2.5,this.y+2.5))>100){
-			shot.reducesound();
-		}
-		if(new Point2D.Double(comp.player.x + 2.5,comp.player.y + 2.5).distance(new Point2D.Double(this.x+2.5,this.y+2.5))<200){
-		
-		shot.play();
-		}
+		if (shotTimer != 0) {
+			shotTimer--;
+			Sound shot = new Sound("sound/gunshot.wav");
+			if (new Point2D.Double(comp.player.x + 2.5, comp.player.y + 2.5)
+					.distance(new Point2D.Double(this.x + 2.5, this.y + 2.5)) > 100) {
+				shot.reducesound();
+			}
+			if (new Point2D.Double(comp.player.x + 2.5, comp.player.y + 2.5)
+					.distance(new Point2D.Double(this.x + 2.5, this.y + 2.5)) < 200) {
+
+				shot.play();
+			}
 		}
 		if (hitTimer > 0)
 			hitTimer--;

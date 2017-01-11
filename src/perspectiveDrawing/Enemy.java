@@ -39,7 +39,9 @@ public class Enemy extends Pixel {
 			}catch(Exception e){
 				
 			}
+
 		}
+
 		if (hitTimer > 0)
 			hitTimer--;
 	}

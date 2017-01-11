@@ -39,6 +39,7 @@ public class Player {
 	int shotCoolDown = 15;
 	int coolDown = 0;
 	int score = 0;
+	boolean isShooting = false;
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;
@@ -121,8 +122,8 @@ public class Player {
 	public void shoot() {
 		ArrayList<Pixel> toRemove = new ArrayList<Pixel>();
 		if (coolDown <= 0) {
-			Sound shot = new Sound("sound/gunshot.wav");
-			shot.play();
+			//Sound shot = new Sound("sound/gunshot.wav");
+			//shot.play();
 			for (Pixel pixel : comp.pixels) {
 
 				if (pixel instanceof Enemy && !(pixel instanceof GhostPlayer)) {
@@ -150,6 +151,7 @@ public class Player {
 			comp.pixels.removeAll(toRemove);
 
 			coolDown = shotCoolDown;
+			isShooting  = true;
 		}
 	}
 

@@ -97,7 +97,7 @@ public class Component extends JComponent implements KeyListener {
 			g.setColor(Color.darkGray.darker().darker().darker());
 			g.fillRect(0, 400, 1000, 200);
 			drawGround(g);
-			for (int i = 0; i < 200; i++) {
+			for (int i = 0; i < 200; i++) { 
 				Color clr = new Color(0, 20, 0, (255 / 200) * i);
 				g.setColor(clr);
 				// g.fillRect(0, 599 - i, 1000, 1);
@@ -118,29 +118,34 @@ public class Component extends JComponent implements KeyListener {
 			// g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
 			spawnGhost();
 			if (client != null) {
-				if (player.coolDown != player.shotCoolDown - 2)
-					sendToClient(player.x + "," + player.y);
-				else
-					sendToServer(player.x + "," + player.y + ",");
-
+				if (!player.isShooting)
+					sendToClient((int)player.x + "," + (int)player.y);
+				else{
+					sendToClient((int)player.x + "," + (int)player.y + ",1");
+					player.isShooting = false;
+				}
 				String info = readFromClient();
 				otherguy.x = Double.parseDouble(info.split(",")[0]);
 				otherguy.y = Double.parseDouble(info.split(",")[1]);
-				if (info.split("'").length == 3) {
+				System.out.println(info.split(",").length);
+				if (info.split(",").length > 2) {
 					otherguy.shotTimer = 1;
+					System.out.println("shot");
 				}
 			}
 			if (server != null) {
-				if (player.coolDown != player.shotCoolDown - 2)
-					sendToServer(player.x + "," + player.y);
-				else
-					sendToServer(player.x + "," + player.y + ",");
-
+				if (!player.isShooting)
+					sendToServer((int)player.x + "," + (int)player.y);
+				else{
+					sendToServer((int)player.x + "," + (int)player.y + ",1");
+				player.isShooting = false;
+			}
 				String info = readFromServer();
 				otherguy.x = Double.parseDouble(info.split(",")[0]);
 				otherguy.y = Double.parseDouble(info.split(",")[1]);
-				if (info.split("'").length == 3) {
+				if (info.split(",").length == 3) {
 					otherguy.shotTimer = 1;
+					System.out.println("shot");
 				}
 			}
 			break;
@@ -501,12 +506,13 @@ public class Component extends JComponent implements KeyListener {
 
 			DataOutputStream out = new DataOutputStream(outToClient);
 			out.writeUTF(outStr);
+		
 			System.out.println("The size of the outgoing info is " + out.size());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public String readFromServer() {
 		InputStream inFromServer;
 		try {

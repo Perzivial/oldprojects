@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -97,7 +98,7 @@ public class Component extends JComponent implements KeyListener {
 			g.setColor(Color.darkGray.darker().darker().darker());
 			g.fillRect(0, 400, 1000, 200);
 			drawGround(g);
-			for (int i = 0; i < 200; i++) { 
+			for (int i = 0; i < 200; i++) {
 				Color clr = new Color(0, 20, 0, (255 / 200) * i);
 				g.setColor(clr);
 				// g.fillRect(0, 599 - i, 1000, 1);
@@ -117,44 +118,18 @@ public class Component extends JComponent implements KeyListener {
 				drawPixels(g);
 			// g.drawImage(getSlice(player.img, 5,10), 0, 0, null);
 			spawnGhost();
-			if (client != null) {
-				if (!player.isShooting)
-					sendToClient((int)player.x + "," + (int)player.y);
-				else{
-					sendToClient((int)player.x + "," + (int)player.y + ",1");
-					player.isShooting = false;
-				}
-				String info = readFromClient();
-				otherguy.x = Double.parseDouble(info.split(",")[0]);
-				otherguy.y = Double.parseDouble(info.split(",")[1]);
-				System.out.println(info.split(",").length);
-				if (info.split(",").length > 2) {
-					otherguy.shotTimer = 1;
-					System.out.println("shot");
-				}
-			}
-			if (server != null) {
-				if (!player.isShooting)
-					sendToServer((int)player.x + "," + (int)player.y);
-				else{
-					sendToServer((int)player.x + "," + (int)player.y + ",1");
-				player.isShooting = false;
-			}
-				String info = readFromServer();
-				otherguy.x = Double.parseDouble(info.split(",")[0]);
-				otherguy.y = Double.parseDouble(info.split(",")[1]);
-				if (info.split(",").length == 3) {
-					otherguy.shotTimer = 1;
-					System.out.println("shot");
-				}
-			}
+
 			break;
 		case STATE_DEAD:
+			player.x = Integer.MAX_VALUE;
 			g.drawImage(deathImage, 0, 0, 1000, 600, null);
 			resetCounter--;
 			if (resetCounter <= 0) {
 				reset();
-				state = STATE_MENU;
+				if (server == null && client == null)
+					state = STATE_MENU;
+				else
+					pixels.add(otherguy);
 			}
 			break;
 		case STATE_MENU:
@@ -182,7 +157,68 @@ public class Component extends JComponent implements KeyListener {
 			g.drawString("Press enter when ready", 10, 200);
 			break;
 		}
+		if (client != null) {
+			if (!player.isShooting)
+				sendToClient((int) player.x + "," + (int) player.y);
+			else {
+				boolean shoulddamage = false;
 
+				RoundRectangle2D rectmy = new RoundRectangle2D.Double(460, 300, 70, 200, 100, 200);
+				for (Rectangle rect : otherguy.columns) {
+					if (rectmy.intersects(rect)) {
+						shoulddamage = true;
+					}
+				}
+				if (!shoulddamage)
+					sendToClient((int) player.x + "," + (int) player.y + ",1");
+				else
+					sendToClient((int) player.x + "," + (int) player.y + ",2");
+				player.isShooting = false;
+			}
+			String info = readFromClient();
+			otherguy.x = Double.parseDouble(info.split(",")[0]);
+			otherguy.y = Double.parseDouble(info.split(",")[1]);
+			System.out.println(info.split(",").length);
+			if (info.split(",").length > 2) {
+				System.out.println(info.split(",")[2]);
+				if (info.split(",")[2].equals("2"))
+					player.health -= player.damage;
+				otherguy.shotTimer = 1;
+				System.out.println("shot");
+			}
+		}
+		///
+		if (server != null) {
+			if (!player.isShooting)
+				sendToServer((int) player.x + "," + (int) player.y);
+			else {
+				boolean shoulddamage = false;
+
+				RoundRectangle2D rectmy = new RoundRectangle2D.Double(460, 300, 70, 200, 100, 200);
+				for (Rectangle rect : otherguy.columns) {
+					if (rectmy.intersects(rect)) {
+						shoulddamage = true;
+					}
+				}
+				if (!shoulddamage)
+					sendToServer((int) player.x + "," + (int) player.y + ",1");
+				else
+					sendToServer((int) player.x + "," + (int) player.y + ",2");
+				player.isShooting = false;
+			}
+			String info = readFromServer();
+			otherguy.x = Double.parseDouble(info.split(",")[0]);
+			otherguy.y = Double.parseDouble(info.split(",")[1]);
+			if (info.split(",").length == 3) {
+				System.out.println(info.split(",")[2]);
+				if (info.split(",")[2].equals("2"))
+					player.health -= player.damage;
+				otherguy.shotTimer = 1;
+				System.out.println("shot");
+			}
+		}
+		otherguy.columns.clear();
+	///
 	}
 
 	public void reset() {
@@ -367,7 +403,7 @@ public class Component extends JComponent implements KeyListener {
 				if (e.getKeyCode() != KeyEvent.VK_BACK_SPACE)
 					tempServerName += e.getKeyChar();
 			}
-			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
+			if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 
 				if (isEditingPort) {
 					if (tempPort.length() > 0)
@@ -506,13 +542,13 @@ public class Component extends JComponent implements KeyListener {
 
 			DataOutputStream out = new DataOutputStream(outToClient);
 			out.writeUTF(outStr);
-		
+
 			System.out.println("The size of the outgoing info is " + out.size());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String readFromServer() {
 		InputStream inFromServer;
 		try {

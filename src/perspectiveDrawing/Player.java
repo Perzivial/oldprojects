@@ -35,11 +35,12 @@ public class Player {
 	BufferedImage shotgun = new Image("img/pistol.png").getScaledInstance(200, 50);
 	BufferedImage ghostIcon = new Image("img/ghosticon.png").img;
 	boolean queueShot = false;
-	int damage = 25;
+	int damage = 50;
 	int shotCoolDown = 15;
 	int coolDown = 0;
 	int score = 0;
 	boolean isShooting = false;
+
 	public Player(double xpos, double ypos, double ang, Component myComp) {
 		x = xpos;
 		y = ypos;
@@ -50,7 +51,7 @@ public class Player {
 	public void draw(Graphics g) {
 		Graphics gSep = g.create();
 		Graphics2D g2 = (Graphics2D) g;
-		
+
 		for (Pixel pixel : comp.pixels) {
 			if (pixel instanceof Enemy) {
 				((Enemy) pixel).drawColumns(g2);
@@ -83,13 +84,13 @@ public class Player {
 		int numGhosts = 0;
 		for (Pixel pixel : comp.pixels) {
 			if (pixel instanceof Enemy) {
-				if(pixel.dist < 20)
-				numGhosts++;
+				if (pixel.dist < 20)
+					numGhosts++;
 			}
 		}
-		if(numGhosts > 0){
-			g.drawImage(ghostIcon, 20, 450, 50,50,null);
-			g.setFont(new Font(g.getFont().getFontName(),50,40));
+		if (numGhosts > 0) {
+			g.drawImage(ghostIcon, 20, 450, 50, 50, null);
+			g.setFont(new Font(g.getFont().getFontName(), 50, 40));
 			g.setColor(Color.white);
 			g.drawString(Integer.toString(numGhosts), 70, 490);
 		}
@@ -122,8 +123,8 @@ public class Player {
 	public void shoot() {
 		ArrayList<Pixel> toRemove = new ArrayList<Pixel>();
 		if (coolDown <= 0) {
-			//Sound shot = new Sound("sound/gunshot.wav");
-			//shot.play();
+			 Sound shot = new Sound("sound/gunshot.wav");
+			 shot.play();
 			for (Pixel pixel : comp.pixels) {
 
 				if (pixel instanceof Enemy && !(pixel instanceof GhostPlayer)) {
@@ -138,7 +139,7 @@ public class Player {
 								if (((Enemy) pixel).health <= 0) {
 									toRemove.add(pixel);
 									((Enemy) pixel).playDeadSound();
-									score ++;
+									score++;
 								}
 								hasHit = true;
 							}
@@ -151,7 +152,7 @@ public class Player {
 			comp.pixels.removeAll(toRemove);
 
 			coolDown = shotCoolDown;
-			isShooting  = true;
+			isShooting = true;
 		}
 	}
 
@@ -395,7 +396,8 @@ public class Player {
 						pixel.dist = getDistToRect(line, pixel);
 						pixel.z = -pixel.dist / 2;
 						if (pixel instanceof Enemy)
-							pixel.z = line.getP1().distance(new Point2D.Double(pixel.x + 5, pixel.y + 5));
+					
+						pixel.z = line.getP1().distance(new Point2D.Double(pixel.x + 5, pixel.y + 5));
 						// pixel.z = (-pixel.dist
 						// *Math.sin(Math.toRadians(90)))/Math.sin(Math.toRadians(tempangle));
 						// pixel.z =(pixel.dist * -Math.cos(addAngle));
@@ -419,7 +421,6 @@ public class Player {
 
 					}
 
-
 				}
 			}
 			// comp.sortPixelsByDistance();
@@ -437,7 +438,7 @@ public class Player {
 					Line2D sideLine2 = new Line2D.Double(pixel.x, pixel.y + 10, pixel.x + 10, pixel.y + 10);
 					Line2D sideLine3 = new Line2D.Double(pixel.x, pixel.y, pixel.x, pixel.y + 10);
 					Line2D sideLine4 = new Line2D.Double(pixel.x + 10, pixel.y, pixel.x + 10, pixel.y + 10);
-					
+
 					if (line.intersectsLine(sideLine1)) {
 						double tempX = lineIntersectPoint(line, sideLine1).getX();
 						double tempY = lineIntersectPoint(line, sideLine1).getY();

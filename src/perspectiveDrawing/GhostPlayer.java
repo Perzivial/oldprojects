@@ -46,10 +46,10 @@ public class GhostPlayer extends Enemy {
 		if(shotTimer != 0){
 		shotTimer --;
 		Sound shot = new Sound("sound/gunshot.wav");
-		if(new Point2D.Double(comp.player.x + 2.5,comp.player.y + 2.5).distance(new Point2D.Double(this.x+2.5,this.y+2.5))>50){
+		if(new Point2D.Double(comp.player.x + 2.5,comp.player.y + 2.5).distance(new Point2D.Double(this.x+2.5,this.y+2.5))>100){
 			shot.reducesound();
 		}
-		if(new Point2D.Double(comp.player.x + 2.5,comp.player.y + 2.5).distance(new Point2D.Double(this.x+2.5,this.y+2.5))<100){
+		if(new Point2D.Double(comp.player.x + 2.5,comp.player.y + 2.5).distance(new Point2D.Double(this.x+2.5,this.y+2.5))<200){
 		
 		shot.play();
 		}
@@ -61,7 +61,7 @@ public class GhostPlayer extends Enemy {
 	@Override
 	public void move() {
 		amountHit = 0;
-		columns.clear();
+
 		rect = new Rectangle2D.Double(x, y, 5, 5);
 	}
 }

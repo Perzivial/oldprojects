@@ -43,11 +43,13 @@ public class GhostPlayer extends Enemy {
 			} catch (Exception e) {
 
 			}
+			/*
 			int transparency = (int) this.dist * 5;
 			if (transparency > 255)
 				transparency = 255;
 			g2.setColor(new Color(0, 0, 0, transparency));
 			g2.fill(current);
+			*/
 		}
 		if (shotTimer != 0) {
 			shotTimer--;

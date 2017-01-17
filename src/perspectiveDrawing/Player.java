@@ -400,7 +400,9 @@ public class Player {
 						// TODO the distance
 
 						pixel.dist = getDistToRect(line, pixel);
-						pixel.z = -pixel.dist / 2;
+						//pixel.z = -pixel.dist;
+						pixel.z = pixel.dist;
+					//	pixel.z -= Math.abs(angle-tempangle);
 						if (pixel instanceof Enemy)
 
 							pixel.z = line.getP1().distance(new Point2D.Double(pixel.x + 5, pixel.y + 5));
@@ -522,8 +524,9 @@ public class Player {
 					g3.setColor(new Color(red, green, blue));
 					g3.translate(0, 100);
 					// System.out.println(pixel.z);
-					pixel.z = Math.abs(pixel.z);
-
+					pixel.z = pixel.z;
+					double x = pixel.dist * Math.cos(Math.toRadians(Math.abs(angle-tempangle)));
+					pixel.z = (x+pixel.dist)/2;
 					try {
 						// TODO draws the collumns of the pixels
 						// g3.translate(0, -((WALL_HEIGHT / ((int) pixel.dist /
@@ -562,8 +565,14 @@ public class Player {
 						}
 						Point2D myPoint = getPointOnRect(line, pixel, tempangle);
 
-						g.setColor(Color.red);
-						g.fillRect((int) myPoint.getX() - 1, (int) myPoint.getY() - 1, 2, 2);
+					
+						Graphics2D gsep = (Graphics2D) g.create();
+					
+						gsep.scale(-1, 1);
+						gsep.translate(-1000, 0);
+					
+						gsep.setColor(Color.red);
+						gsep.fillRect((int) myPoint.getX() - 1, (int) myPoint.getY() - 1, 2, 2);
 						// g3.translate(200, 200);
 						g3.setColor(Color.green);
 						// g3.draw(sideLine4);

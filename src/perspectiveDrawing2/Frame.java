@@ -1,4 +1,4 @@
-package perspectiveDrawing;
+package perspectiveDrawing2;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,7 +43,7 @@ public class Frame extends JFrame {
 	public Frame(String s) throws Exception {
 
 		super(s);
-	
+
 		/*
 		 * JPanel p = new JPanel(); label = new JLabel("Key Listener!");
 		 * p.add(label); add(p); addKeyListener(this); setSize(200, 100);
@@ -57,38 +57,39 @@ public class Frame extends JFrame {
 		frame.setResizable(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		theComponent.addKeyListener(theComponent);
-//		theComponent.addMouseListener(theComponent);
-//		theComponent.addMouseMotionListener(theComponent);
+		// theComponent.addMouseListener(theComponent);
+		// theComponent.addMouseMotionListener(theComponent);
 		// theComponent.addMouseWheelListener(theComponent);
 		theComponent.setFocusable(true);
 
-		frame.getContentPane().setBackground(new Color(0,0,30));
+		frame.getContentPane().setBackground(new Color(0, 0, 30));
 		theComponent.setDoubleBuffered(true);
 		theComponent.setVisible(true);
-		
+
 		frame.setVisible(true);
-		Font myFont = new Font("Lucida", Font.PLAIN, 25);
+		Font myFont = new Font("Lucida", Font.PLAIN, 12);
 		theComponent.setFont(myFont);
 
 		setLayout(new FlowLayout()); // set the layout manager
 		/*
-		// Transparent 16 x 16 pixel cursor image.
-		BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-
-		// Create a new blank cursor.
-		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-		    cursorImg, new Point(0, 0), "blank cursor");
-
-		// Set the blank cursor to the JFrame.
-		frame.getContentPane().setCursor(blankCursor);
-		*/
+		 * // Transparent 16 x 16 pixel cursor image. BufferedImage cursorImg =
+		 * new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		 * 
+		 * // Create a new blank cursor. Cursor blankCursor =
+		 * Toolkit.getDefaultToolkit().createCustomCursor( cursorImg, new
+		 * Point(0, 0), "blank cursor");
+		 * 
+		 * // Set the blank cursor to the JFrame.
+		 * frame.getContentPane().setCursor(blankCursor);
+		 */
 		theComponent.frame = frame;
+		theComponent.player.frame = frame;
 		timer = new Timer(ONE_SECOND / 30, new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 
 				theComponent.repaint();
-				
+
 			}
 		});
 	}
